@@ -1,0 +1,56 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Delete,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+
+import { PontosColetaService } from './pontos-coleta.service';
+import { CreatePontoColetaDto } from './dto/create-ponto-coleta.dto';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+@ApiTags('pontos-coleta')
+@Controller('pontos-coleta')
+export class PontosColetaController {
+  constructor(
+    private readonly pontosColetaService: PontosColetaService,
+  ) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  @ApiOperation({ summary: 'Cadastra um novo ponto de coleta' })
+  create(@Body() createPontoColetaDto: CreatePontoColetaDto) {
+    return this.pontosColetaService.create(createPontoColetaDto);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Lista todos os pontos de coleta' })
+  findAll() {
+    return this.pontosColetaService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  @ApiOperation({
+    summary: 'Inativa, reativa ou remove um ponto de coleta',
+  })
+  remove(
+    @Param('id') id: string,
+    @Query('tipo') tipo: 'soft' | 'hard' | 'reativar' = 'soft',
+  ) {
+    if (tipo === 'hard') {
+      return this.pontosColetaService.hardDelete(id);
+    }
+
+    if (tipo === 'reativar') {
+      return this.pontosColetaService.reativar(id);
+    }
+
+    return this.pontosColetaService.softDelete(id);
+  }
+}

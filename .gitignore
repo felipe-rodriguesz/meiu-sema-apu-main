@@ -1,0 +1,23 @@
+# Dependências, compilações e caches locais
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Configuração local; apenas modelos podem ser versionados
+.env
+.env.*
+!.env.example
+
+# Logs e arquivos temporários
+*.log
+*.pid
+.DS_Store
+Thumbs.db
+
+# Materiais privados e ferramentas locais
+contexto-meiu/
+.codex/
+.agents/

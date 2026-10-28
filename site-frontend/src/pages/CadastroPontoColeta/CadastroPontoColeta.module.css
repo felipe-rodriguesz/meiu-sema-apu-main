@@ -1,0 +1,369 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.topContainer {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.mapSection {
+  flex: 1 1 500px;
+  z-index: 0;
+  min-width: 0;
+}
+
+.title {
+  color: #2d6a4f;
+  margin-bottom: 12px;
+}
+
+.description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.map {
+  width: 100%;
+  height: 450px;
+  border-radius: 8px;
+}
+
+.formCard {
+  flex: 1 1 350px;
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.formTitle {
+  color: #2d6a4f;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.input,
+.select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.select {
+  background-color: #fff;
+}
+
+.coordinatesContainer {
+  display: flex;
+  gap: 12px;
+}
+
+.coordinateBox {
+  flex: 1;
+}
+
+.coordinateLabel {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+.coordinateInput {
+  width: 100%;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.submitButton {
+  width: 100%;
+  background-color: #1b4332;
+  color: #fff;
+  padding: 13px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 10px;
+  transition:
+    opacity 0.2s ease,
+    transform 0.15s ease;
+}
+
+.submitButton:hover {
+  opacity: 0.9;
+}
+
+.submitButton:active {
+  transform: scale(0.98);
+}
+
+.reactivateButton {
+  padding: 7px 14px;
+  background-color: #1b4332;
+  color: #fff;
+  border: 2px solid #1b4332;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  opacity: 1;
+  box-shadow: 0 4px 10px rgba(27, 67, 50, 0.25);
+  transition:
+    transform 0.15s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.reactivateButton:hover {
+  background-color: #2d6a4f;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(27, 67, 50, 0.32);
+}
+
+.reactivateButton:active {
+  transform: scale(0.97);
+}
+
+.tableContainer {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.tableWrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tableHeadRow {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.th {
+  padding: 12px;
+  white-space: nowrap;
+}
+
+.center {
+  text-align: center;
+}
+
+.emptyRow {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+}
+
+.tableRow {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.inactiveRow {
+  opacity: 1;
+  background-color: #fff5f5;
+}
+
+.inactiveRow .td,
+.inactiveRow .bold,
+.inactiveRow .smallText,
+.inactiveRow .actions {
+  opacity: 1;
+  color: inherit;
+}
+
+.td {
+  padding: 12px;
+  vertical-align: top;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.smallText {
+  display: block;
+  font-size: 14px;
+  color: #555;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.activeBadge {
+  background-color: #d8f3dc;
+  color: #1b4332;
+}
+
+.inactiveBadge {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f1aeb5;
+}
+
+.actions {
+  padding: 12px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.softDeleteButton {
+  padding: 6px 12px;
+  background-color: #fff;
+  color: #721c24;
+  border: 1px solid #721c24;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.softDeleteButton:hover {
+  background-color: #f8d7da;
+}
+
+.softDeleteButton:active {
+  transform: scale(0.97);
+}
+
+.hardDeleteButton {
+  padding: 6px 12px;
+  background-color: #dc3545;
+  color: #fff;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.hardDeleteButton:hover {
+  background-color: #bb2d3b;
+}
+
+.hardDeleteButton:active {
+  transform: scale(0.97);
+}
+
+.disabledText {
+  font-size: 13px;
+  color: #888;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .topContainer {
+    flex-direction: column;
+  }
+
+  .mapSection {
+    flex: 1 1 auto;
+  }
+
+  .formCard {
+    flex: 1 1 auto;
+    padding: 18px;
+  }
+
+  .tableContainer {
+    padding: 14px;
+  }
+
+  .coordinatesContainer {
+    flex-direction: column;
+  }
+
+  .map {
+    height: 360px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    gap: 18px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .description {
+    font-size: 13px;
+  }
+
+  .formCard {
+    padding: 16px;
+  }
+
+  .actions {
+    gap: 6px;
+  }
+
+  .softDeleteButton,
+  .hardDeleteButton,
+  .reactivateButton {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
