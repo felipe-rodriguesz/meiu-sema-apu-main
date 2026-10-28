@@ -1,5 +1,7 @@
 # MEIU - Gestão de Resíduos Têxteis (SEMA Apucarana)
 
+> **Desenvolvimento da fase IV:** este repositório privado no GitHub contém os fontes recebidos no GitLab, com o histórico original preservado. Consulte o [guia de desenvolvimento](DESENVOLVIMENTO.md) para configurar o ambiente, trabalhar em dupla e preparar a entrega ao GitLab. O roadmap abaixo foi recebido com o código; as tarefas da fase IV devem ser combinadas pela equipe conforme o alinhamento com a SEMA.
+
 O **MEIU** (Mapeamento de Resíduos Têxteis) é um sistema desenvolvido para a Secretaria do Meio Ambiente (SEMA) do Município de Apucarana. Seu objetivo é organizar, rastrear e otimizar o fluxo de descarte de resíduos têxteis por meio de um aplicativo voltado para o cidadão/gerador e um painel administrativo para a gestão municipal.
 
 Este repositório é um monorepo contendo três aplicações principais:
