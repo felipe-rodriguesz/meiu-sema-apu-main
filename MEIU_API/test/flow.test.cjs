@@ -137,6 +137,10 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
     assert.equal(pending.quantidade_kg, 2.5); assert.equal(pending.lat, null); assert.equal(pending.lon, null);
     assert.equal(pending.peso_recebido_kg, null); assert.equal(pending.situacao, 'PENDENTE');
     const more = await Promise.all(Array.from({ length: 4 }, () => create()));
+    for (const result of more) {
+      assert.equal(result.status, 201, JSON.stringify(result.body));
+      assert.equal(typeof result.body.protocolo, 'string');
+    }
     assert.equal(new Set(more.map(r => r.body.protocolo)).size, 4);
   });
 

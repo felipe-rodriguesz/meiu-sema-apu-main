@@ -117,5 +117,5 @@ ALTER TABLE descarte
       );
       CREATE INDEX idx_descarte_recebido_em ON descarte(recebido_em) WHERE situacao = 'RECEBIDO';
       CREATE INDEX idx_descarte_ponto ON descarte(ponto_coleta_id);
-    
+
 COMMIT;

@@ -6,7 +6,7 @@ O desenvolvimento seguirá por etapas, conforme a disponibilidade de Felipe e Jo
 
 ## 1. Prioridades da Fase IV
 
-**Base de partida:** já existem login administrativo, cadastro/ativação/desativação de pontos, formulário, protocolo e consulta de pedidos. Precisam de ajustes a proteção da API, os pesos decimais, a localização, a interface e o tratamento de erros. Recebimento, peso aferido, QR Code, informações de funcionamento dos pontos e relatórios com exportação ainda precisam ser desenvolvidos. As estatísticas existentes somam pesos declarados; não representam recebimentos.
+**Estado técnico:** a frente de Felipe já implementou proteção administrativa, pesos decimais, validações, recebimento com peso aferido e histórico de correções, migrações e ambiente local com backup. As verificações estão em [Entrega de Felipe](docs/ENTREGA-FELIPE.md). A frente de José ainda inclui os ajustes de formulário/localização, configuração operacional dos pontos, QR Code e relatórios/CSV. A publicação HTTPS depende da hospedagem. As estatísticas antigas somam pesos declarados; não representam recebimentos.
 
 | Ordem | Prioridade | Resultado esperado |
 | --- | --- | --- |
@@ -42,10 +42,10 @@ Esse fluxo será testado primeiro com pontos e dados fictícios. Quando houver u
 
 ### Critérios para concluir a entrega técnica
 
-- [ ] Consultas e ações administrativas exigem autenticação; formulário público e informações públicas dos pontos continuam acessíveis.
-- [ ] Um registro de **2,5 kg** é salvo corretamente; entradas inválidas recebem mensagens claras; pontos inativos não aceitam novos pedidos. A tentativa de excluir ponto vinculado é tratada sem erro interno, preservando a desativação e os registros.
+- [x] Consultas e ações administrativas exigem autenticação; formulário público e informações públicas dos pontos continuam acessíveis.
+- [x] Um registro de **2,5 kg** é salvo corretamente; entradas inválidas recebem mensagens claras; pontos inativos não aceitam novos pedidos. A tentativa de excluir ponto vinculado é tratada sem erro interno, preservando a desativação e os registros.
 - [ ] Geolocalização negada/ausente não gera coordenadas fictícias nem impede indevidamente o fluxo.
-- [ ] Em teste controlado, **10 kg declarados e 8,7 kg recebidos** permanecem separados. Repetir a confirmação mantém uma única entrega de 8,7 kg; pendências não entram como peso recebido.
+- [x] Em teste controlado, **10 kg declarados e 8,7 kg recebidos** permanecem separados. Repetir a confirmação mantém uma única entrega de 8,7 kg; pendências não entram como peso recebido.
 - [ ] Tela e CSV coincidem para os mesmos filtros, inclusive quando não há resultados; a referência de período está clara.
 - [ ] É possível cadastrar/configurar outro ponto fictício e completar o fluxo em celular e painel, usando QR Code e busca manual, sem alterar o código.
 - [ ] O ambiente está acessível, os dados persistem, a cópia de segurança foi conferida e existem instruções de operação e manutenção.

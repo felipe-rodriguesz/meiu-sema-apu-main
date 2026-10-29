@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: meiu
+      POSTGRES_USER: meiu
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD no .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meiu -d meiu"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    restart: unless-stopped
+  migrate:
+    build: ./MEIU_API
+    environment: &api-env
+      DATABASE_URL: postgresql://meiu:${POSTGRES_PASSWORD}@db:5432/meiu
+      DATABASE_SSL: "false"
+      JWT_SECRET: ${JWT_SECRET:?Configure JWT_SECRET no .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      NODE_ENV: production
+      PORT: 3001
+    command: ["npm", "run", "migration:run"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+  api:
+    build: ./MEIU_API
+    environment: *api-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+  https:
+    image: caddy:2-alpine
+    profiles: ["https"]
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+    restart: unless-stopped
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
