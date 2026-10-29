@@ -5,14 +5,14 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { PontoColeta } from '../../pontos-coleta/entities/ponto-coleta.entity';
 
 @Entity('descarte')
 export class Descarte {
   @PrimaryColumn('uuid')
-  id: string = uuidv4();
+  id: string = randomUUID();
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   criado_em: Date = new Date();
@@ -31,6 +31,18 @@ export class Descarte {
 
   @Column({ type: 'numeric', precision: 12, scale: 3, nullable: true, transformer: { to: value => value, from: value => value == null ? null : Number(value) } })
   quantidade_kg: number;
+
+  @Column({ type: 'numeric', precision: 12, scale: 3, nullable: true, transformer: { to: value => value, from: value => value == null ? null : Number(value) } })
+  peso_recebido_kg: number | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  recebido_em: Date | null;
+
+  @Column({ type: 'uuid', nullable: true })
+  recebido_por: string | null;
+
+  @Column({ type: 'integer', default: 0 })
+  recebimento_versao: number;
 
   @Column({ type: 'integer', nullable: true })
   frequencia_dias: number;

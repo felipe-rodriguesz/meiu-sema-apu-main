@@ -5,11 +5,12 @@ import { DescartesService } from './descartes.service';
 import { DescartesController } from './descartes.controller';
 import { Descarte } from './entities/descarte.entity';
 import { PontoColeta } from '../pontos-coleta/entities/ponto-coleta.entity';
+import { RecebimentosService } from './recebimentos.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Descarte, PontoColeta])],
   controllers: [DescartesController],
-  providers: [DescartesService],
+  providers: [DescartesService, RecebimentosService],
   exports: [DescartesService],
 })
 export class DescartesModule {}

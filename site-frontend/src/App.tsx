@@ -26,7 +26,7 @@ export default function App(): React.JSX.Element {
     );
 
   const [paginaAtual, setPaginaAtual] =
-    useState<PaginaAdmin>('pontos');
+    useState<PaginaAdmin>(() => new URLSearchParams(location.search).has('protocolo') ? 'pedidos' : 'pontos');
 
   useEffect(() => {
     const expired = () => { setToken(null); setUsuario(null); };
@@ -47,7 +47,7 @@ export default function App(): React.JSX.Element {
 
     setToken(null);
     setUsuario(null);
-    setPaginaAtual('pontos');
+    setPaginaAtual(new URLSearchParams(location.search).has('protocolo') ? 'pedidos' : 'pontos');
   };
 
   return (

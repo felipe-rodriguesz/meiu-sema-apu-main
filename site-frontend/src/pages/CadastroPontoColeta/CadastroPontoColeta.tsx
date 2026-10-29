@@ -161,7 +161,7 @@ export default function CadastroPontoColeta(): React.JSX.Element {
         lon: marcador.lng
       };
 
-      await axios.post(`${API_URL}/pontos-coleta`, payload, {
+      await api.post(`/pontos-coleta`, payload, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -207,8 +207,8 @@ export default function CadastroPontoColeta(): React.JSX.Element {
     const token = localStorage.getItem('token_sema');
 
     try {
-      await axios.delete(
-        `${API_URL}/pontos-coleta/${id}?tipo=soft`,
+      await api.delete(
+        `/pontos-coleta/${id}?tipo=soft`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -235,8 +235,8 @@ export default function CadastroPontoColeta(): React.JSX.Element {
     const token = localStorage.getItem('token_sema');
 
     try {
-      await axios.delete(
-        `${API_URL}/pontos-coleta/${id}?tipo=reativar`,
+      await api.delete(
+        `/pontos-coleta/${id}?tipo=reativar`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -263,8 +263,8 @@ export default function CadastroPontoColeta(): React.JSX.Element {
     const token = localStorage.getItem('token_sema');
 
     try {
-      await axios.delete(
-        `${API_URL}/pontos-coleta/${id}?tipo=hard`,
+      await api.delete(
+        `/pontos-coleta/${id}?tipo=hard`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -275,7 +275,7 @@ export default function CadastroPontoColeta(): React.JSX.Element {
       buscarPontos();
     } catch (error) {
       console.error(error);
-      alert('Erro ao remover o ponto do banco.');
+      alert(axios.isAxiosError(error) ? error.response?.data?.message || 'Erro ao remover o ponto.' : 'Erro ao remover o ponto.');
     }
   };
 

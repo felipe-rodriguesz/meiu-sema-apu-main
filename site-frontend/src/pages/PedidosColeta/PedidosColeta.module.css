@@ -1,4 +1,5 @@
 .container {
+  color: #20342a;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -108,11 +109,31 @@
 
 .input,
 .select {
+  color: #20342a;
+  background: white;
   padding: 11px;
   border: 1px solid #ccc;
   border-radius: 6px;
   box-sizing: border-box;
 }
+
+.protocolField { flex: 1; display: grid; gap: 6px; min-width: 180px; }
+.protocolField .input { flex: initial; width: 100%; }
+.receiptDialog { color: #20342a; background: #fff; border: 0; border-radius: 12px; padding: 24px; width: min(820px, calc(100vw - 32px)); max-height: 88vh; overflow-y: auto; box-sizing: border-box; }
+.receiptDialog::backdrop { background: rgb(0 0 0 / 50%); }
+.receiptForm { display: grid; gap: 14px; margin-top: 20px; padding: 18px; border: 1px solid #b6d7c2; border-radius: 8px; }
+.receiptForm h4 { margin: 0; }
+.receiptForm label { display: grid; gap: 6px; }
+.receiptForm .input { flex: initial; width: 100%; }
+.receiptForm .checkLabel { display: flex; align-items: center; gap: 10px; }
+.checkLabel input { width: 20px; height: 20px; }
+.formActions { display: flex; flex-wrap: wrap; gap: 12px; }
+.reloadButton { color: #1b4332; background: #f1f8f4; border: 1px solid #7ba18c; border-radius: 6px; padding: 10px 14px; cursor: pointer; margin-top: 12px; }
+.success { color: #17452a; background: #d8f3dc; padding: 14px; border-radius: 6px; }
+.history { border-top: 1px solid #ddd; margin-top: 20px; padding-top: 12px; }
+.history li { margin-bottom: 14px; overflow-wrap: anywhere; }
+.history p { margin: 6px 0; }
+.receiptDialog button:disabled { opacity: .6; cursor: not-allowed; }
 
 .input {
   flex: 1 1 380px;
