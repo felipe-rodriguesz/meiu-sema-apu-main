@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
@@ -30,8 +31,9 @@ export class PontosColetaService {
     return this.pontoColetaRepository.save(novoPonto);
   }
 
-  async findAll() {
+  async findAll(apenasAtivos = false) {
     return this.pontoColetaRepository.find({
+      where: apenasAtivos ? { status: 'ATIVO' } : {},
       order: {
         criado_em: 'DESC',
       },
@@ -81,7 +83,14 @@ export class PontosColetaService {
       );
     }
 
-    await this.pontoColetaRepository.delete(id);
+    try {
+      await this.pontoColetaRepository.delete(id);
+    } catch (error) {
+      if (error.driverError?.code === '23503') {
+        throw new ConflictException('Este ponto possui pedidos vinculados. Desative-o para preservar o histórico.');
+      }
+      throw error;
+    }
 
     return {
       message: 'Ponto de coleta removido permanentemente',

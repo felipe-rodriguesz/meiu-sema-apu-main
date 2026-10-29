@@ -7,12 +7,15 @@ import {
   Param,
   Query,
   UseGuards,
+  ParseUUIDPipe,
+  BadRequestException,
 } from '@nestjs/common';
 
 import { PontosColetaService } from './pontos-coleta.service';
 import { CreatePontoColetaDto } from './dto/create-ponto-coleta.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Public } from '../auth/public.decorator';
 
 @ApiTags('pontos-coleta')
 @Controller('pontos-coleta')
@@ -29,10 +32,14 @@ export class PontosColetaController {
   }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Lista todos os pontos de coleta' })
   findAll() {
-    return this.pontosColetaService.findAll();
+    return this.pontosColetaService.findAll(true);
   }
+
+  @Get('admin')
+  findAllAdmin() { return this.pontosColetaService.findAll(); }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
@@ -40,9 +47,10 @@ export class PontosColetaController {
     summary: 'Inativa, reativa ou remove um ponto de coleta',
   })
   remove(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Query('tipo') tipo: 'soft' | 'hard' | 'reativar' = 'soft',
   ) {
+    if (!['soft', 'hard', 'reativar'].includes(tipo)) throw new BadRequestException('Operação inválida.');
     if (tipo === 'hard') {
       return this.pontosColetaService.hardDelete(id);
     }

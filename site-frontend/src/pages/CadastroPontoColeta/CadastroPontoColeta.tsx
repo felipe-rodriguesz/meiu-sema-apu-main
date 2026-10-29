@@ -8,6 +8,7 @@ import {
 
 import L from 'leaflet';
 import axios from 'axios';
+import api from '../../services/api';
 
 import 'leaflet/dist/leaflet.css';
 
@@ -88,9 +89,7 @@ export default function CadastroPontoColeta(): React.JSX.Element {
 
   const buscarPontos = async (): Promise<void> => {
     try {
-      const response = await axios.get<PontoColeta[]>(
-        `${API_URL}/pontos-coleta`
-      );
+      const response = await api.get<PontoColeta[]>('/pontos-coleta/admin');
 
       setPontos(response.data);
     } catch (error) {

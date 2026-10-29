@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Navbar from './components/Navbar/Navbar';
 
@@ -27,6 +27,12 @@ export default function App(): React.JSX.Element {
 
   const [paginaAtual, setPaginaAtual] =
     useState<PaginaAdmin>('pontos');
+
+  useEffect(() => {
+    const expired = () => { setToken(null); setUsuario(null); };
+    window.addEventListener('sema:session-expired', expired);
+    return () => window.removeEventListener('sema:session-expired', expired);
+  }, []);
 
   const handleLoginSuccess = (
     novoToken: string,

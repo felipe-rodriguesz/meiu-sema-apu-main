@@ -29,7 +29,7 @@ export class Descarte {
   @Column({ nullable: true })
   residuo_principal: string;
 
-  @Column({ type: 'integer', nullable: true })
+  @Column({ type: 'numeric', precision: 12, scale: 3, nullable: true, transformer: { to: value => value, from: value => value == null ? null : Number(value) } })
   quantidade_kg: number;
 
   @Column({ type: 'integer', nullable: true })
