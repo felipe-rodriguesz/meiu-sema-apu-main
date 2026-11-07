@@ -37,7 +37,7 @@ Para conferir a recuperação, restaure o arquivo em um banco local novo com `sc
 
 ## Segurança e atualização
 
-O pipeline do GitHub compila as três aplicações, executa a suíte da API e verifica dependências de produção. O Render está configurado para publicar após os checks passarem. As credenciais ficam nas variáveis do Render, nunca no repositório.
+O workflow do GitHub está configurado para compilar as três aplicações, executar a suíte da API e verificar dependências de produção. Em 06/11/2026, o GitHub bloqueou sua execução por restrição de cobrança/limite da conta, antes de iniciar qualquer job. As verificações da entrega foram executadas localmente. O Render usa **deploy manual**: valide a versão antes de acionar uma nova publicação. Após regularizar a execução dos checks, pode-se mudar autoDeployTrigger para checksPass. As credenciais ficam nas variáveis do Render, nunca no repositório.
 
 Em 06/11/2026, a auditoria da API identificou nove avisos moderados e nenhum alto/crítico. Os avisos envolvem NestJS/SSE, inspeção de arquivos (`file-type`) e padrões de arquivos (`glob`/`minimatch`). A aplicação atual não expõe SSE nem upload/inspeção de arquivos e utiliza classes de entidades/migrações definidas no código, sem padrões fornecidos por usuários. Isso reduz a exposição dos caminhos afetados, mas não elimina os avisos. Uma atualização principal deve ser validada antes de introduzir esses recursos. Não usar `npm audit fix --force` diretamente no ambiente publicado.
 
