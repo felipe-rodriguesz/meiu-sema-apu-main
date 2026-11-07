@@ -2,16 +2,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 70vh;
+  width: 100%;
 }
 
 .card {
   background-color: #fff;
-  padding: 40px;
+  padding: clamp(20px, 5vw, 40px);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 440px;
 }
 
 .header {

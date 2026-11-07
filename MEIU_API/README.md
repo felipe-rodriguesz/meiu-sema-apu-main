@@ -1,86 +1,20 @@
-# MEIU API - Gestão de Resíduos Têteis
+# API MEIU
 
-Esta é a API Backend para o projeto MEIU de Apucarana. Desenvolvida em **NestJS**, ela fornece os endpoints necessários para registro de descartes, visualização de estatísticas e gestão administrativa.
+NestJS, TypeORM e PostgreSQL. Prefixo: /api/v1.
 
-## Pré-requisitos
+Consulte [execução e manutenção](../docs/OPERACAO.md), [contrato de integração](../docs/INTEGRACAO-FASEIV.md) e [plano da fase](../DESENVOLVIMENTO.md).
 
-- Node.js (v18+)
-- npm ou yarn
+## Comandos
 
-## Usuário administrador padrão para testes
+- npm ci
+- npm run build
+- npm run migration:show
+- npm run migration:run
+- npm run start:dev
+- npm run start:prod
+- npm run admin:create
+- npm test
 
-Para acessar o painel administrativo, é necessário existir um usuário na tabela `admin_sema`.
+Copie .env.example para .env e configure as variáveis antes de executar a API. JWT_SECRET e CORS_ORIGINS são obrigatórios. O banco remoto deve usar TLS com validação de certificado. A estrutura é atualizada por migrações; synchronize permanece desabilitado.
 
-Após criar as tabelas do banco, execute o SQL abaixo no PostgreSQL ou no Query Tool do pgAdmin:
-
-```sql
-INSERT INTO admin_sema (
-  nome,
-  email,
-  senha_hash
-)
-VALUES (
-  'Administrador SEMA',
-  'admin@admin-sema.com',
-  crypt('admin123', gen_salt('bf', 10))
-);
-
-## Instalação
-
-```bash
-cd MEIU_API
-npm install
-```
-
-## Execução com Docker/Podman (Recomendado)
-
-Para simular o ambiente real (incluindo o banco de dados Postgres/Neon), utilize o Compose:
-
-```bash
-# Na raiz do projeto
-podman-compose up --build
-```
-
-Isso irá:
-1. Subir um banco de dados PostgreSQL (container `meiu_db_test`).
-2. Inicializar o banco com o schema `001_initial_schema.sql`.
-3. Compilar e rodar a API NestJS conectada a este banco.
-
----
-
-## Execução Local
-
-```bash
-# Modo de desenvolvimento
-npm run start:dev
-
-# Modo de produção
-npm run build
-npm run start:prod
-```
-
-## Documentação da API
-
-Uma vez que a aplicação estiver rodando, você pode acessar a documentação interativa (Swagger) em:
-[http://localhost:3001/api/docs](http://localhost:3001/api/docs)
-
-## Execução com Docker (Standalone)
-
-Esta API pode ser buildada e executada de forma independente:
-
-```bash
-# Build da imagem
-podman build -t meiu-api .
-
-# Execução (conectando a um banco externo/Neon)
-podman run -p 3001:3001 -e DATABASE_URL="sua_url_neon_aqui" meiu-api
-```
-
----
-
-## Estrutura de Módulos
-
-- **Descartes:** Gerenciamento do fluxo de registro de resíduos (Wizard).
-- **Stats:** Agregação de dados para o painel de impacto.
-- **Auth:** Segurança para acesso administrativo da SEMA.
-- **Noticias:** Conteúdo para a "Vitrine Social" e comunicados.
+Swagger: /api/docs, somente em desenvolvimento. Consultas e operações administrativas exigem JWT; apenas rotas explicitamente públicas dispensam login.

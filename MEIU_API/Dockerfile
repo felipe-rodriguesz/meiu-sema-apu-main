@@ -1,36 +1,23 @@
-# Stage 1: Build
-FROM docker.io/library/node:18-alpine AS build
-
-WORKDIR /app
-
-# Instala dependências primeiro para aproveitar o cache do Docker
-COPY package*.json ./
-RUN npm install
-
-# Copia o código e gera o build
-COPY . .
-RUN npm run build
-
-# Stage 2: Production Dependencies
-# Instala apenas as dependências de produção para manter a imagem leve
-FROM docker.io/library/node:18-alpine AS prod-deps
+FROM node:24-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm ci --no-audit --no-fund
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm run build && find dist -type f -name '*.map' -delete
 
-# Stage 3: Runtime
-FROM docker.io/library/node:18-alpine
-
+FROM node:24-alpine AS dependencies
 WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
 
-# Copia apenas o necessário do estágio de build e de dependências de produção
+FROM node:24-alpine
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
-COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=build /app/package*.json ./
-
+COPY package*.json ./
+COPY scripts ./scripts
+USER node
 EXPOSE 3001
-
-# OWASP: Não rodar como root por segurança (opcional mas recomendado)
-# USER node
-
-CMD ["node", "dist/main"]
+CMD ["node", "dist/main.js"]

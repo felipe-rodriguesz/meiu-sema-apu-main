@@ -1,184 +1,86 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-}
-
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#center {
+.sema-app {
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
-}
-
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
-
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
-}
-
-.ticks {
-  position: relative;
   width: 100%;
+  min-height: 100svh;
+  background: #f9f9f9;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+.sema-main {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: clamp(16px, 2vw, 32px);
+}
+
+.sema-main--login {
+  display: grid;
+  place-items: center;
+}
+
+.sema-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.sema-nav button {
+  padding: 10px 16px;
+  border: 1px solid #b8c5bd;
+  border-radius: 6px;
+  color: #1b4332;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.sema-nav button[aria-pressed="true"] {
+  border-color: #1b4332;
+  background: #1b4332;
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .sema-nav {
+    gap: 8px;
+    margin-bottom: 16px;
   }
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+  .sema-nav button {
+    flex: 1 1 130px;
+    min-width: 0;
+    padding: 10px 12px;
   }
 }
+
+
+/* Shared visual hierarchy across the administrative workspace. */
+.sema-app { --painel-verde: #20563d; --painel-borda: #dbe5df; --painel-muted: #53675c; background: #f3f6f4; color: #243c2e; }
+.sema-main { line-height: 1.45; }
+.sema-main button,.sema-main input,.sema-main select,.sema-main textarea { font-family: inherit; }
+.sema-main button { min-height: 40px; }
+.sema-main :is(button,a,input,select,textarea,[tabindex]):focus-visible { outline: 3px solid #348557; outline-offset: 3px; }
+.sema-nav { padding: 6px; background: #e6ede8; border-radius: 12px; width: fit-content; max-width: 100%; gap: 4px; }
+.sema-nav button { border-color: transparent; background: transparent; border-radius: 8px; }
+.sema-nav button:hover { background: #d6e4db; }
+.sema-nav button[aria-pressed=true] { background: #20563d; border-color: #20563d; box-shadow: 0 2px 5px #12351f20; }
+.painel-cabecalho { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 0; }
+.painel-cabecalho h2 { margin: 0 0 6px; font-size: clamp(1.35rem,2vw,1.7rem); color: #234e38; }
+.painel-cabecalho p { margin: 0; color: #53675c; max-width: 850px; }
+.painel-link { color: #20563d; font-weight: 600; text-underline-offset: 4px; }
+.painel-subtitulo { margin: 0 0 12px; font-size: 1.05rem; color: #254c37; }
+.painel-ajuda { color: #53675c; font-size: .88rem; line-height: 1.5; }
+.painel-filtros { display: flex; flex-wrap: wrap; gap: 14px; align-items: end; }
+.painel-filtros label { display: grid; gap: 6px; flex: 1 1 200px; min-width: 0; font-size: .9rem; font-weight: 600; }
+.painel-filtros label:first-child { flex-grow: 2; }
+.painel-filtros input,.painel-filtros select { width: 100%; min-width: 0; padding: 11px; border: 1px solid #adbdaf; border-radius: 8px; font: inherit; }
+.sema-main .painel-secundario { border: 1px solid #afc2b7; border-radius: 8px; background: white; color: #28573e; padding: 10px 14px; cursor: pointer; font: inherit; }
+.sema-main .painel-secundario:hover { background: #edf4ef; }
+.painel-sucesso { padding: 14px 18px; border-radius: 10px; border: 1px solid #a9cdb6; color: #20563d; background: #edf7f0; margin: 0; }
+.painel-rolagem { display: none; color: #53675c; font-size: .8rem; }
+.painel-status { display: inline-block; padding: 5px 9px; border-radius: 999px; background: #edf0ee; color: #45554b; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+.painel-status--pendente { color: #775310; background: #fff2cf; }
+.painel-status--recebido { color: #1b5a37; background: #dff1e5; }
+@media(max-width: 1100px) { .painel-rolagem { display: block; } }
+@media(max-width: 600px) { .sema-nav { width: 100%; flex-wrap: nowrap; } .sema-nav button { flex: 1 1 0; font-size: .8rem; padding: 10px 5px; } }

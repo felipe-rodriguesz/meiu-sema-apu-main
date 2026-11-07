@@ -19,6 +19,9 @@ import type {
   PontoColeta,
 } from "../types/questionario.types";
 import { calcularDistanciaKm } from "../utils/distancia";
+import { CondicoesAtendimento } from './CondicoesAtendimento';
+
+const temCoordenadas = (p: PontoColeta) => p.lat != null && p.lon != null && Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lon));
 
 type StepMapaColetaProps = {
   localizacao: LocalizacaoUsuario | null;
@@ -56,7 +59,7 @@ function formatarDistancia(
   localizacao: LocalizacaoUsuario | null,
   ponto: PontoColeta
 ) {
-  if (!localizacao || ponto.lat === undefined || ponto.lon === undefined) {
+  if (!localizacao || !temCoordenadas(ponto)) {
     return null;
   }
 
@@ -84,12 +87,9 @@ export function StepMapaColeta({
 }: StepMapaColetaProps) {
   const mapRef = useRef<LeafletMap | null>(null);
 
-  const pontosComCoordenadas = pontos.filter((ponto) => {
-    const lat = Number(ponto.lat);
-    const lon = Number(ponto.lon);
-
-    return !Number.isNaN(lat) && !Number.isNaN(lon);
-  });
+  const pontosComCoordenadas = pontos.filter(temCoordenadas);
+  const primeiro = pontosComCoordenadas[0];
+  const centro = localizacao || (primeiro ? { lat: Number(primeiro.lat), lon: Number(primeiro.lon) } : { lat: -23.5522, lon: -51.46 });
 
   function selecionarPonto(ponto: PontoColeta) {
     onSelecionarPonto(ponto);
@@ -97,7 +97,7 @@ export function StepMapaColeta({
     const lat = Number(ponto.lat);
     const lon = Number(ponto.lon);
 
-    if (!Number.isNaN(lat) && !Number.isNaN(lon) && mapRef.current) {
+    if (temCoordenadas(ponto) && mapRef.current) {
       mapRef.current.flyTo([lat, lon], 16, {
         animate: true,
         duration: 0.8,
@@ -110,45 +110,37 @@ export function StepMapaColeta({
       <h1>Escolha um ponto de coleta</h1>
 
       <p>
-        Veja os pontos próximos no mapa e selecione uma opção na lista abaixo.
+        Confira as condições de atendimento e selecione um ponto. A localização do aparelho, quando disponível, serve apenas para ordenar os pontos por proximidade.
       </p>
-
-      <div className="tech-debt-box">
-        <strong>Débito técnico declarado:</strong>
-        <span>
-          nesta versão, todos os pontos próximos são exibidos. O questionário
-          ainda não filtra o ponto ideal por tipo de resíduo.
-        </span>
-      </div>
 
       {!localizacao && (
         <div className="info-box">
-          Obtendo localização aproximada do dispositivo...
+          Você pode continuar sem compartilhar a localização. Escolha o ponto na lista ou no mapa.
         </div>
       )}
 
-      {localizacao && (
+      {(
         <div className="map-wrapper compact-map">
           <MapContainer
-            center={[localizacao.lat, localizacao.lon]}
+            center={[centro.lat, centro.lon]}
             zoom={14}
             className="leaflet-map"
             scrollWheelZoom={false}
             ref={mapRef}
           >
-            <RecenterMap lat={localizacao.lat} lon={localizacao.lon} />
+            <RecenterMap lat={centro.lat} lon={centro.lon} />
 
             <TileLayer
               attribution="&copy; OpenStreetMap"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            <Marker
+            {localizacao && <Marker
               position={[localizacao.lat, localizacao.lon]}
               icon={usuarioIcon}
             >
-              <Popup>Você está aqui</Popup>
-            </Marker>
+              <Popup>Localização aproximada do aparelho</Popup>
+            </Marker>}
 
             {pontosComCoordenadas.map((ponto) => {
               const lat = Number(ponto.lat);
@@ -190,17 +182,17 @@ export function StepMapaColeta({
 
       <div className="collection-list-header">
         <strong>Pontos disponíveis</strong>
-        <span>{pontosComCoordenadas.length} encontrados</span>
+        <span>{pontos.length} encontrados</span>
       </div>
 
       <div className="collection-points-list">
-        {pontosComCoordenadas.length === 0 && (
+        {pontos.length === 0 && (
           <div className="error-box">
-            Nenhum ponto de coleta com coordenadas foi encontrado.
+            Nenhum ponto de coleta disponível no momento.
           </div>
         )}
 
-        {pontosComCoordenadas.slice(0, 8).map((ponto, index) => {
+        {pontos.map((ponto, index) => {
           const selecionado = pontoSelecionado?.id === ponto.id;
           const distancia = formatarDistancia(localizacao, ponto);
 
@@ -230,6 +222,7 @@ export function StepMapaColeta({
                     ponto.bairro ||
                     "Endereço não informado"}
                 </p>
+                <CondicoesAtendimento ponto={ponto} />
               </div>
 
               <button

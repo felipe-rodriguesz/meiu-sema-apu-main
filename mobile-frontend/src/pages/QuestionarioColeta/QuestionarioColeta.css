@@ -585,3 +585,11 @@
 .success-actions {
   margin-top: 18px;
 }
+.condicoes-atendimento { font-size: .9rem; line-height: 1.5; width: 100%; overflow-wrap: anywhere; }
+.condicoes-atendimento div { margin-top: 8px; }
+.condicoes-atendimento dt { font-weight: 700; }
+.condicoes-atendimento dd { margin: 0; white-space: pre-wrap; }
+.qr-protocolo { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 16px 0; }
+.qr-protocolo img { max-width: 100%; height: auto; background: #fff; }
+.qr-protocolo a { padding: 10px 16px; border: 1px solid #18663d; border-radius: 6px; color: #165c38; }
+.next-steps-card li { padding-bottom: 12px; line-height: 1.5; }

@@ -1,0 +1,23 @@
+FROM node:24-alpine AS panel
+WORKDIR /panel
+COPY site-frontend/package*.json ./
+RUN npm ci --no-audit --no-fund
+COPY site-frontend/ ./
+ENV VITE_API_URL=/api/v1
+RUN npm run build -- --base=/admin/
+
+FROM node:24-alpine AS public
+WORKDIR /public
+COPY mobile-frontend/package*.json ./
+RUN npm ci --no-audit --no-fund
+COPY mobile-frontend/ ./
+ENV VITE_API_URL=/api/v1
+ENV VITE_PAINEL_URL=/admin/
+RUN npm run build
+
+FROM nginx:stable-alpine
+COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+COPY deploy/security-headers.conf /etc/nginx/security-headers.conf
+COPY --from=public /public/dist /usr/share/nginx/html
+COPY --from=panel /panel/dist /usr/share/nginx/html/admin
+EXPOSE 80

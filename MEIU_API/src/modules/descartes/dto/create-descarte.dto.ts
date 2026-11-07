@@ -1,103 +1,42 @@
-import {
-  IsBoolean,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsNotEmpty,
-  IsPositive,
-  Min,
-  Max,
-  IsUUID,
-} from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsInt, IsNumber, IsOptional, IsString, IsNotEmpty, IsPositive, MaxLength, Min, Max, IsUUID } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+const trim = ({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() : value;
 
 export class CreateDescarteDto {
-  @ApiProperty({
-    description: 'Indica se o material é uma mistura de vários tipos',
-    example: true,
-  })
-  @IsBoolean()
-  @IsNotEmpty()
+  @ApiProperty() @IsBoolean()
   eh_mistura: boolean;
 
-  @ApiProperty({
-    description: 'Tipo principal do resíduo (ex: Retalho de corte)',
-    example: 'Retalho de corte',
-  })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty() @Transform(trim) @IsString() @IsNotEmpty() @MaxLength(150)
   residuo_principal: string;
 
-  @ApiProperty({
-    description: 'Quantidade aproximada em quilogramas',
-    example: 10,
-  })
-  @IsNumber()
-  @IsPositive()
-  @IsNotEmpty()
+  @ApiProperty({ example: 2.5, description: 'Peso declarado em kg, positivo e com até três casas decimais.' })
+  @IsNumber({ maxDecimalPlaces: 3 }, { message: 'Informe o peso em kg com até três casas decimais.' })
+  @IsPositive({ message: 'O peso deve ser maior que zero.' }) @Max(999999999.999)
   quantidade_kg: number;
 
-  @ApiProperty({
-    description: 'Frequência estimada de geração em dias',
-    example: 7,
-  })
-  @IsNumber()
-  @IsPositive()
-  @IsNotEmpty()
+  @ApiProperty({ example: 7 })
+  @IsInt({ message: 'A frequência deve ser um número inteiro de dias.' })
+  @Min(1, { message: 'A frequência deve ser de pelo menos um dia.' }) @Max(2147483647)
   frequencia_dias: number;
 
-  @ApiProperty({
-    description: 'Composição do material (ex: Algodão + Poliéster)',
-    example: 'Algodão',
-  })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty() @Transform(trim) @IsString() @IsNotEmpty() @MaxLength(150)
   material: string;
 
-  @ApiProperty({
-    description: 'Estado físico do material (ex: Limpo, Contaminado)',
-    example: 'Limpo',
-  })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty() @Transform(trim) @IsString() @IsNotEmpty() @MaxLength(150)
   estado_material: string;
 
-  @ApiProperty({
-    description: 'Aplicação original ou tipo de tecido',
-    example: 'Tecido plano',
-  })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty() @Transform(trim) @IsString() @IsNotEmpty() @MaxLength(150)
   tipo_tecido: string;
 
-  @ApiProperty({
-    description: 'Latitude para mapeamento de hotspots',
-    example: -23.41,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
+  @ApiPropertyOptional() @IsOptional() @IsNumber() @Min(-90) @Max(90)
   lat?: number;
 
-  @ApiProperty({
-    description: 'Longitude para mapeamento de hotspots',
-    example: -51.44,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
+  @ApiPropertyOptional() @IsOptional() @IsNumber() @Min(-180) @Max(180)
   lon?: number;
 
-  @ApiProperty({
-    description: 'ID do ponto de coleta escolhido pelo usuário',
-    example: 'a3d7b1a2-1234-4f9a-9a11-abc123456789',
-    required: false,
-  })
-  @IsOptional()
-  @IsUUID()
-  ponto_coleta_id?: string;
+  @ApiProperty({ description: 'Ponto ativo escolhido pelo gerador.' })
+  @IsUUID('all', { message: 'Selecione um ponto de coleta válido.' })
+  ponto_coleta_id: string;
 }

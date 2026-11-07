@@ -1,0 +1,59 @@
+name: Verificacoes de seguranca
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [MEIU_API, site-frontend, mobile-frontend]
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high
+
+  api-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: meiu_test
+          POSTGRES_PASSWORD: local_ci_only
+          POSTGRES_DB: meiu_faseiv_test_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U meiu_test -d meiu_faseiv_test_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: MEIU_API/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: MEIU_API
+      - run: npm test
+        working-directory: MEIU_API
+        env:
+          TEST_DATABASE_URL: postgresql://meiu_test:local_ci_only@localhost:5432/meiu_faseiv_test_ci

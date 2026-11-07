@@ -27,9 +27,10 @@ export function Aviso({ onContinue }: AvisoProps) {
         </p>
 
         <p>
-          Para gerar o registro de coleta, algumas informações técnicas do
-          dispositivo poderão ser coletadas, como data, horário, localização
-          aproximada e dados necessários para criar o protocolo do descarte.
+          O sistema registra a data, o horário e as características do resíduo.
+          Se você permitir, a localização aproximada do aparelho é utilizada
+          apenas para mostrar os pontos mais próximos; ela não é enviada como
+          origem do resíduo. É possível continuar sem compartilhar a localização.
         </p>
 
         <p>

@@ -16,4 +16,6 @@ export class AdminSemaService {
       where: { email },
     });
   }
+
+  findById(id: string) { return this.repository.findOneBy({ id }); }
 }

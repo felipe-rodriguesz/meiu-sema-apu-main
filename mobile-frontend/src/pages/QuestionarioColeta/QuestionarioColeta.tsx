@@ -26,7 +26,7 @@ export function QuestionarioColeta() {
       <QuestionarioHeader etapa={questionario.etapa} />
 
       {questionario.erro && (
-        <div className="error-box">{questionario.erro}</div>
+        <div className="error-box" role="alert">{questionario.erro}</div>
       )}
 
       {questionario.etapa === 1 && (
@@ -61,17 +61,21 @@ export function QuestionarioColeta() {
       )}
 
       {questionario.etapa === 5 && (
-        <StepMapaColeta
+        <><div aria-live="polite">
+          {questionario.carregandoPontos && <p>Carregando pontos...</p>}
+          {questionario.erroPontos && <p role="alert">{questionario.erroPontos}</p>}
+          <button type="button" className="secondary-button" disabled={questionario.carregandoPontos} onClick={() => void questionario.carregarPontos()}>Atualizar pontos</button>
+        </div><StepMapaColeta
           localizacao={questionario.localizacao}
           pontos={questionario.pontosOrdenados}
           pontoSelecionado={questionario.pontoSelecionado}
           onSelecionarPonto={questionario.setPontoSelecionado}
-        />
+        /></>
       )}
 
       <footer className="questionario-footer">
         {questionario.etapa > 1 && (
-          <button className="secondary-button" onClick={questionario.voltar}>
+          <button className="secondary-button" disabled={questionario.carregando} onClick={questionario.voltar}>
             Voltar
           </button>
         )}
@@ -84,7 +88,7 @@ export function QuestionarioColeta() {
           <button
             className="primary-button"
             onClick={questionario.gerarPedido}
-            disabled={questionario.carregando}
+            disabled={questionario.carregando || questionario.carregandoPontos || !!questionario.erroPontos}
           >
             {questionario.carregando ? "Gerando..." : "Gerar pedido"}
           </button>

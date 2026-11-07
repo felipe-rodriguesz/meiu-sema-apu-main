@@ -13,6 +13,11 @@ coverage/
 
 # Logs e arquivos temporários
 *.log
+*.map
+*.pem
+*.key
+*.p12
+*.pfx
 *.pid
 .DS_Store
 Thumbs.db
@@ -21,3 +26,4 @@ Thumbs.db
 contexto-meiu/
 .codex/
 .agents/
+.local/

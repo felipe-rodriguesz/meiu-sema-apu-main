@@ -16,7 +16,8 @@ export async function criarDescarte(payload: CriarDescartePayload) {
   });
 
   if (!response.ok) {
-    throw new Error("Erro ao criar descarte.");
+    const body = await response.json().catch(() => null);
+    throw new Error([].concat(body?.message || 'Não foi possível registrar. Tente novamente.').join(' '));
   }
 
   return response.json() as Promise<CriarDescarteResponse>;

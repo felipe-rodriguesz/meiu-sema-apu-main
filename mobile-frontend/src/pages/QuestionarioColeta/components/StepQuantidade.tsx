@@ -21,15 +21,15 @@ export function StepQuantidade({
       <label className="field">
         <span>Quantidade aproximada em kg</span>
         <input
-          type="number"
-          min="1"
+          type="text"
           inputMode="decimal"
-          placeholder="Ex: 10"
+          placeholder="Ex: 2,5"
           value={quantidadeKg}
           onChange={(event) =>
             onChange("quantidade_kg", event.target.value)
           }
         />
+        <small>Quantidade positiva em kg, com até três casas decimais.</small>
       </label>
 
       <label className="field">
