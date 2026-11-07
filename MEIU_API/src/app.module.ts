@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { RelatoriosModule } from './modules/relatorios/relatorios.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -32,6 +33,7 @@ import { databaseOptions, validateEnvironment } from './config/environment';
     }),
 
     DescartesModule,
+    RelatoriosModule,
     StatsModule,
     AuthModule,
     NoticiasModule,

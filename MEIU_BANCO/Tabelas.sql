@@ -35,9 +35,22 @@ CREATE TABLE IF NOT EXISTS ponto_coleta (
     lat         NUMERIC,
     lon         NUMERIC,
     status      CHARACTER VARYING        DEFAULT 'ATIVO',
-    criado_em   TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    criado_em   TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    dias_semana INTEGER[] NOT NULL DEFAULT '{}',
+    horarios_semana JSONB NOT NULL DEFAULT '[]',
+    materiais_lista TEXT[] NOT NULL DEFAULT '{}',
+    data_inicio DATE,
+    data_fim DATE,
+    horario_inicio VARCHAR(5),
+    horario_fim VARCHAR(5),
+    materiais_aceitos TEXT,
+    limite_kg_por_pedido NUMERIC(12,3),
+    orientacoes TEXT,
 
-    CONSTRAINT pk_ponto_coleta PRIMARY KEY (id)
+    CONSTRAINT pk_ponto_coleta PRIMARY KEY (id),
+    CONSTRAINT ponto_limite_positivo CHECK (limite_kg_por_pedido > 0),
+    CONSTRAINT ponto_horarios_array CHECK (jsonb_typeof(horarios_semana) = 'array' AND jsonb_array_length(horarios_semana) <= 7),
+    CONSTRAINT ponto_datas_validas CHECK (data_inicio IS NULL OR data_fim IS NULL OR data_inicio <= data_fim)
 );
 
 -- -------------------------------------------------------------

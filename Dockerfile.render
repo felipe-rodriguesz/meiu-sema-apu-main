@@ -1,0 +1,44 @@
+FROM node:24-alpine AS panel
+WORKDIR /panel
+COPY site-frontend/package*.json ./
+RUN npm ci --no-audit --no-fund
+COPY site-frontend/ ./
+ENV VITE_API_URL=/api/v1
+RUN npm run build -- --base=/admin/
+
+FROM node:24-alpine AS public
+WORKDIR /public
+COPY mobile-frontend/package*.json ./
+RUN npm ci --no-audit --no-fund
+COPY mobile-frontend/ ./
+ENV VITE_API_URL=/api/v1
+ENV VITE_PAINEL_URL=/admin/
+RUN npm run build
+
+FROM node:24-alpine AS api
+WORKDIR /app
+COPY MEIU_API/package*.json ./
+RUN npm ci --no-audit --no-fund
+COPY MEIU_API/tsconfig.json ./
+COPY MEIU_API/src ./src
+RUN npm run build && find dist -type f -name '*.map' -delete
+
+FROM node:24-alpine AS dependencies
+WORKDIR /app
+COPY MEIU_API/package*.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
+
+FROM node:24-alpine
+ENV NODE_ENV=production PORT=10000 STATIC_DIR=/app/public
+WORKDIR /app
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=api /app/dist ./dist
+COPY --from=public /public/dist ./public
+COPY --from=panel /panel/dist ./public/admin
+COPY MEIU_API/package*.json ./
+COPY MEIU_API/scripts ./scripts
+COPY deploy/start-render.sh ./start-render.sh
+RUN sed -i 's/\r$//' start-render.sh
+USER node
+EXPOSE 10000
+CMD ["sh", "start-render.sh"]

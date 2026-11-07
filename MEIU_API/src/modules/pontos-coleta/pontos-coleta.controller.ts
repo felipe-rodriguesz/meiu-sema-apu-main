@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Delete,
   Param,
@@ -40,6 +41,11 @@ export class PontosColetaController {
 
   @Get('admin')
   findAllAdmin() { return this.pontosColetaService.findAll(); }
+
+  @Put(':id')
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: CreatePontoColetaDto) {
+    return this.pontosColetaService.update(id, dto);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')

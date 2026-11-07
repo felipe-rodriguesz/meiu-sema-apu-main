@@ -6,6 +6,8 @@ Este repositório privado preserva os fontes e o histórico recebidos pelo GitLa
 
 - [Plano da Fase IV](DESENVOLVIMENTO.md)
 - [Execução, operação e manutenção](docs/OPERACAO.md)
+- [Publicação no Render gratuito](docs/RENDER.md)
+- [Verificação da versão consolidada](docs/ENTREGA-FASEIV.md)
 - [Integração entre Felipe e José](docs/INTEGRACAO-FASEIV.md)
 - [Implementação e verificações da frente de Felipe](docs/ENTREGA-FELIPE.md)
 
@@ -35,6 +37,6 @@ Crie a conta administrativa conforme [OPERAÇÃO](docs/OPERACAO.md). Não há se
 
 Já estão disponíveis: login, pontos de coleta, formulário, protocolo, consulta administrativa protegida, pesos decimais, recebimento autenticado, correção de peso com histórico, migrações e estrutura de execução/backup.
 
-A frente de José inclui ajustes do formulário/localização, configuração operacional dos pontos, QR Code e relatórios com filtros/CSV. As estatísticas antigas somam **peso declarado**, não recebimentos.
+Também estão implementados formulário com localização opcional, configuração operacional dos pontos, QR Code, relatórios com filtros/CSV e proteções de sessão. Felipe consolidou essa versão, sem outra implementação pendente de integração. As estatísticas antigas somam **peso declarado**, não recebimentos.
 
-O escopo e a ordem de execução seguem DESENVOLVIMENTO.md. A instalação local foi testada com dados fictícios. Publicação HTTPS depende de hospedagem/domínio; uso real e validação operacional com a SEMA permanecem pendentes.
+O escopo e a ordem de execução seguem DESENVOLVIMENTO.md. A imagem para o Render gratuito foi testada com dados fictícios. Uso real e validação operacional com a SEMA permanecem pendentes. A hospedagem gratuita é temporária; observe os limites e a expiração do banco descritos em RENDER.md.

@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: meiu-sema-apucarana
+    runtime: docker
+    plan: free
+    region: virginia
+    branch: main
+    dockerfilePath: ./Dockerfile.render
+    healthCheckPath: /api/v1/pontos-coleta
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY_HOPS
+        value: '1'
+      - key: DATABASE_SSL
+        value: 'false'
+      - key: DATABASE_URL
+        fromDatabase:
+          name: meiu-sema-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+databases:
+  - name: meiu-sema-db
+    plan: free
+    region: virginia
+    postgresMajorVersion: '16'
+    databaseName: meiu
+    user: meiu
+    ipAllowList: []

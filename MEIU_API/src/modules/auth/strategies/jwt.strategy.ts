@@ -4,13 +4,15 @@ import { AdminSemaService } from '../../administradores/admin-sema.service';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Strategy } from 'passport-jwt';
+import type { Request } from 'express';
+import { sessionToken } from '../session-cookie';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService, private readonly admins: AdminSemaService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: (request: Request) => sessionToken(request, configService.get('NODE_ENV') === 'production'),
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('JWT_SECRET'),
       algorithms: ['HS256'],

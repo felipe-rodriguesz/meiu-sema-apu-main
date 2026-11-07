@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { login } from '../../services/auth';
+import type { UsuarioSema } from '../../services/auth';
 
 import styles from './Login.module.css';
 
-interface UsuarioSema {
-  nome: string;
-  email: string;
-}
-
 interface LoginProps {
-  onLoginSuccess: (token: string, usuario: UsuarioSema) => void;
-}
-
-interface LoginResponse {
-  access_token: string;
-  usuario: UsuarioSema;
+  onLoginSuccess: (usuario: UsuarioSema) => void;
 }
 
 export default function Login({
@@ -25,10 +17,6 @@ export default function Login({
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
 
-  const API_URL =
-    (import.meta.env.VITE_API_URL as string) ||
-    'http://localhost:3001/api/v1';
-
   const handleLogin = async (
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -38,28 +26,11 @@ export default function Login({
     setCarregando(true);
 
     try {
-      const response = await axios.post<LoginResponse>(
-        `${API_URL}/auth/login`,
-        {
-          email,
-          senha
-        }
-      );
-
-      const { access_token, usuario } = response.data;
-
-      localStorage.setItem('token_sema', access_token);
-
-      localStorage.setItem(
-        'usuario_sema',
-        JSON.stringify(usuario)
-      );
-
-      onLoginSuccess(access_token, usuario);
-    } catch (error: any) {
-      console.error('Erro ao fazer login:', error);
-
-      if (error.response?.data?.message) {
+      const usuario = await login(email, senha);
+      setSenha('');
+      onLoginSuccess(usuario);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
         const mensagem = Array.isArray(error.response.data.message)
           ? error.response.data.message.join(', ')
           : error.response.data.message;

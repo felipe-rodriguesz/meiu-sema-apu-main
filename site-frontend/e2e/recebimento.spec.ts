@@ -15,13 +15,12 @@ for (const viewport of [{ width: 1365, height: 900 }, { width: 390, height: 844 
     await page.setViewportSize(viewport);
     const logged = await request.post(api + '/auth/login', { data: { email, senha: password } });
     expect(logged.ok()).toBeTruthy();
-    const token = (await logged.json()).access_token;
-    const headers = { Authorization: 'Bearer ' + token };
+    const headers = { Origin: new URL(api).origin };
     const pointResponse = await request.post(api + '/pontos-coleta', {
       headers, data: { nome: 'Ponto fictício E2E ' + randomUUID().slice(0, 8), tipo: 'Ponto Fixo', bairro: 'Centro', endereco: 'Endereço de teste' }
     });
     const point = await pointResponse.json();
-    const created = await request.post(api + '/descartes', { data: {
+    const created = await request.post(api + '/descartes', { headers, data: {
       ponto_coleta_id: point.id, quantidade_kg: 10, frequencia_dias: 7, eh_mistura: false,
       residuo_principal: 'Retalhos', material: 'Algodão', estado_material: 'Limpo', tipo_tecido: 'Plano'
     } });

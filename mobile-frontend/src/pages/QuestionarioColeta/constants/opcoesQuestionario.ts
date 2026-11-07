@@ -32,6 +32,7 @@ export const opcoesEstado = [
   "Queimado / danificado",
   "Defeituoso",
   "Misturado com outros resíduos",
+  "Não sei informar",
 ];
 
 export const opcoesTecido = [

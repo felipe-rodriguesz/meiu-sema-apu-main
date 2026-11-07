@@ -19,6 +19,9 @@ export class DescartesService {
             where: { id: dto.ponto_coleta_id }, lock: { mode: 'pessimistic_read' },
           });
           if (!ponto || ponto.status !== 'ATIVO') throw new BadRequestException('Selecione um ponto de coleta existente e ativo.');
+          if (ponto.limite_kg_por_pedido != null && dto.quantidade_kg > ponto.limite_kg_por_pedido) {
+            throw new BadRequestException(`Este ponto aceita até ${ponto.limite_kg_por_pedido} kg por pedido. Ajuste a quantidade ou escolha outro ponto.`);
+          }
           const saved = await manager.save(Descarte, manager.create(Descarte, {
             ...dto, protocolo: 'TX-' + randomBytes(8).toString('hex').toUpperCase(), situacao: 'PENDENTE',
           }));

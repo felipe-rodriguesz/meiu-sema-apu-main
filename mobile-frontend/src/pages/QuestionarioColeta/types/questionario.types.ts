@@ -14,6 +14,16 @@ export type PontoColeta = {
   lat?: number;
   lon?: number;
   status?: string;
+  dias_semana?: number[];
+  horarios_semana?: { dia: number; inicio: string | null; fim: string | null }[];
+  materiais_lista?: string[];
+  data_inicio?: string | null;
+  data_fim?: string | null;
+  horario_inicio?: string | null;
+  horario_fim?: string | null;
+  materiais_aceitos?: string | null;
+  limite_kg_por_pedido?: number | null;
+  orientacoes?: string | null;
 };
 
 export type FormularioDescarte = {
@@ -36,7 +46,7 @@ export type CriarDescartePayload = {
   tipo_tecido: string;
   lat?: number;
   lon?: number;
-  ponto_coleta_id?: string;
+  ponto_coleta_id: string;
 };
 
 export type CriarDescarteResponse = {

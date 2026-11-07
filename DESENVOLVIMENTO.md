@@ -6,7 +6,7 @@ O desenvolvimento seguirá por etapas, conforme a disponibilidade de Felipe e Jo
 
 ## 1. Prioridades da Fase IV
 
-**Estado técnico:** a frente de Felipe já implementou proteção administrativa, pesos decimais, validações, recebimento com peso aferido e histórico de correções, migrações e ambiente local com backup. As verificações estão em [Entrega de Felipe](docs/ENTREGA-FELIPE.md). A frente de José ainda inclui os ajustes de formulário/localização, configuração operacional dos pontos, QR Code e relatórios/CSV. A publicação HTTPS depende da hospedagem. As estatísticas antigas somam pesos declarados; não representam recebimentos.
+**Estado técnico:** Felipe consolidou também formulário/localização, configuração dos pontos, QR Code e relatórios/CSV. Não há implementação de José pendente de integração. A divisão abaixo permanece como referência do planejamento; a versão consolidada passa a ser a base de entrega. As estatísticas antigas somam pesos declarados; os relatórios de recebimento usam os pesos aferidos. A hospedagem escolhida é o Render gratuito, com limites descritos em [Publicação no Render](docs/RENDER.md).
 
 | Ordem | Prioridade | Resultado esperado |
 | --- | --- | --- |
@@ -23,7 +23,7 @@ O desenvolvimento seguirá por etapas, conforme a disponibilidade de Felipe e Jo
 ### Regras definidas para implementação
 
 - **Registro automático, sem aprovação prévia:** o gerador preenche o formulário, escolhe um ponto ativo e recebe o protocolo/QR Code. Nome, CPF e CNPJ não são obrigatórios. O protocolo comprova o registro; a aceitação do material ocorre na conferência presencial.
-- **Pontos configuráveis:** permitir cadastrar e atualizar endereço, dias/datas, horários, materiais aceitos, limites e orientações, além de ativar/desativar. Reutilizar o cadastro existente e manter preenchimento manual de endereço/bairro. O funcionamento deve atender novos pontos supervisionados sem mudanças no código.
+- **Pontos configuráveis:** permitir cadastrar e atualizar endereço, dias da semana com horários próprios, lista de materiais aceitos (incluindo opções próprias do ponto), limites e orientações, além de ativar/desativar. Reutilizar o cadastro existente e manter preenchimento manual de endereço/bairro. O funcionamento deve atender novos pontos supervisionados sem mudanças no código.
 - **Recebimento autenticado:** localizar o pedido por QR Code ou busca manual, conferir o material, registrar peso aferido, data e operador e alterar `PENDENTE` para `RECEBIDO`. Preservar o peso declarado e impedir confirmação duplicada. Eventuais correções devem ser rastreáveis.
 - **Relatórios e CSV:** mostrar registros, recebimentos, pendências, kg declarados e kg recebidos; agrupar por ponto e tipo de resíduo. Filtrar por período, ponto, resíduo e situação, identificando a data usada no filtro. Exportar exatamente os resultados filtrados.
 - **Dados coerentes:** aceitar peso fracionado; rejeitar frequência inválida com mensagem clara; manter localização não informada quando não obtida ou confirmada. Não usar a posição do aparelho ou o bairro do ponto como origem comprovada do resíduo. Registros anônimos não equivalem a pessoas únicas.
@@ -44,10 +44,10 @@ Esse fluxo será testado primeiro com pontos e dados fictícios. Quando houver u
 
 - [x] Consultas e ações administrativas exigem autenticação; formulário público e informações públicas dos pontos continuam acessíveis.
 - [x] Um registro de **2,5 kg** é salvo corretamente; entradas inválidas recebem mensagens claras; pontos inativos não aceitam novos pedidos. A tentativa de excluir ponto vinculado é tratada sem erro interno, preservando a desativação e os registros.
-- [ ] Geolocalização negada/ausente não gera coordenadas fictícias nem impede indevidamente o fluxo.
+- [x] Na implementação local, geolocalização negada/ausente não gera coordenadas fictícias nem impede indevidamente o fluxo.
 - [x] Em teste controlado, **10 kg declarados e 8,7 kg recebidos** permanecem separados. Repetir a confirmação mantém uma única entrega de 8,7 kg; pendências não entram como peso recebido.
-- [ ] Tela e CSV coincidem para os mesmos filtros, inclusive quando não há resultados; a referência de período está clara.
-- [ ] É possível cadastrar/configurar outro ponto fictício e completar o fluxo em celular e painel, usando QR Code e busca manual, sem alterar o código.
+- [x] Na implementação local, tela e CSV coincidem para os mesmos filtros, inclusive quando não há resultados; a referência de período está clara.
+- [x] Na implementação local, é possível cadastrar/configurar outro ponto fictício e completar o fluxo nas larguras de desktop e celular no navegador, usando QR Code e busca manual, sem alterar o código. Teste em aparelho físico permanece pendente.
 - [ ] O ambiente está acessível, os dados persistem, a cópia de segurança foi conferida e existem instruções de operação e manutenção.
 - [ ] Não há falhas abertas que exponham dados administrativos, impeçam registro/recebimento ou produzam totais incorretos. As correções foram retestadas e as evidências estão organizadas.
 

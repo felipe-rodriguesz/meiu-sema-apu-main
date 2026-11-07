@@ -46,7 +46,7 @@ export default function PedidosColeta(): React.JSX.Element {
   const detailSequence = useRef(0);
 
   const carregar = useCallback(async () => {
-    setCarregando(true);
+    setCarregando(true); setErro('');
     try { setPedidos((await api.get<Pedido[]>('/descartes')).data); }
     catch (error) { setErro(message(error)); }
     finally { setCarregando(false); }
@@ -126,7 +126,7 @@ export default function PedidosColeta(): React.JSX.Element {
         {carregando ? 'Atualizando...' : 'Atualizar lista'}
       </button>
     </section>
-    <form className={styles.filters} onSubmit={e => { e.preventDefault(); void abrir(protocolo); }}>
+    <form className={styles.filters + " " + styles.protocolSearch} onSubmit={e => { e.preventDefault(); void abrir(protocolo); }}>
       <label className={styles.protocolField}>Localizar protocolo
         <input className={styles.input} value={protocolo} onChange={e => setProtocolo(e.target.value)}
           placeholder="TX-..." required maxLength={100} autoComplete="off" />
@@ -140,13 +140,18 @@ export default function PedidosColeta(): React.JSX.Element {
       <div className={styles.card}><span className={styles.cardLabel}>Peso recebido</span><strong className={styles.cardValue}>{kg(recebidos)}</strong></div>
     </section>
     <section className={styles.filters}>
-      <input aria-label="Filtrar pedidos" className={styles.input} value={busca} onChange={e => setBusca(e.target.value)} placeholder="Filtrar por protocolo, material ou ponto..." />
-      <select aria-label="Situação" className={styles.select} value={filtro} onChange={e => setFiltro(e.target.value)}>
+      <label className={styles.filterField}>Buscar na lista<input aria-label="Filtrar pedidos" className={styles.input} value={busca} onChange={e => setBusca(e.target.value)} placeholder="Protocolo, material, ponto ou bairro" /></label>
+      <label className={styles.filterField}>Situação<select aria-label="Situação" className={styles.select} value={filtro} onChange={e => setFiltro(e.target.value)}>
         <option value="TODOS">Todas as situações</option>
         {situacoes.map(s => <option key={s} value={s}>{s}</option>)}
-      </select>
+      </select></label>
+      {(busca || filtro !== 'TODOS') && <button type="button" className="painel-secundario" onClick={() => { setBusca(''); setFiltro('TODOS'); }}>Limpar filtros</button>}
     </section>
-    <section className={styles.tableContainer}><div className={styles.tableWrapper}>
+    <section className={styles.tableContainer}>
+      <h3 className="painel-subtitulo">Lista de pedidos</h3>
+      <p className="painel-ajuda" role="status">{carregando ? 'Atualizando pedidos...' : filtrados.length + ' de ' + pedidos.length + ' pedidos'} · Os totais acima acompanham os filtros desta lista.</p>
+      <p className="painel-rolagem">Deslize a tabela para ver todas as informações e ações.</p>
+      <div className={styles.tableWrapper} tabIndex={0} role="region" aria-label="Lista de pedidos">
       <table className={styles.table}>
         <thead><tr className={styles.tableHeadRow}>{['Protocolo / registro', 'Resíduo', 'Ponto de coleta', 'Declarado', 'Recebido', 'Situação', 'Ações'].map(label => <th className={styles.th} key={label} scope="col">{label}</th>)}</tr></thead>
         <tbody>
@@ -157,7 +162,7 @@ export default function PedidosColeta(): React.JSX.Element {
             <td className={styles.td}>{p.ponto_coleta?.nome || 'Não informado'}</td>
             <td className={styles.td}>{kg(p.quantidade_kg)}</td>
             <td className={styles.td}>{kg(p.peso_recebido_kg)}</td>
-            <td className={styles.td}><span className={styles.statusBadge}>{p.situacao}</span></td>
+            <td className={styles.td}><span className={styles.statusBadge + ' ' + (p.situacao === 'PENDENTE' ? styles.pendingBadge : p.situacao === 'RECEBIDO' ? styles.receivedBadge : styles.neutralBadge)}>{p.situacao}</span></td>
             <td className={styles.td}><button disabled={buscando} className={styles.detailsButton} onClick={() => void abrir(p.protocolo)}>Ver pedido</button></td>
           </tr>)}
         </tbody>

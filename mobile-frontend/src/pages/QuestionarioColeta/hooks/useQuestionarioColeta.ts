@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { criarDescarte } from "../services/descartesService";
 import { useLocalizacaoAtual } from "./useLocalizacaoAtual";
@@ -26,23 +26,24 @@ export function useQuestionarioColeta() {
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [protocolo, setProtocolo] = useState("");
+  const envio = useRef(false);
   const [pontoSelecionado, setPontoSelecionado] = useState<PontoColeta | null>(
     null
   );
 
   const { localizacao } = useLocalizacaoAtual();
-  const { pontos } = usePontosColeta();
+  const { pontos, erroPontos, carregandoPontos, carregarPontos } = usePontosColeta();
 
   const pontosOrdenados = useMemo(() => {
     if (!localizacao) return pontos;
 
     return [...pontos].sort((a, b) => {
-      const distanciaA = calcularDistanciaKm(localizacao, {
+      const distanciaA = a.lat == null || a.lon == null ? Infinity : calcularDistanciaKm(localizacao, {
         lat: Number(a.lat),
         lon: Number(a.lon),
       });
 
-      const distanciaB = calcularDistanciaKm(localizacao, {
+      const distanciaB = b.lat == null || b.lon == null ? Infinity : calcularDistanciaKm(localizacao, {
         lat: Number(b.lat),
         lon: Number(b.lon),
       });
@@ -73,6 +74,14 @@ export function useQuestionarioColeta() {
     if (etapa === 3 && (!form.quantidade_kg || !form.frequencia_dias)) {
       return "Informe a quantidade e a frequência.";
     }
+    if (etapa === 3) {
+      const peso = form.quantidade_kg.trim().replace(',', '.');
+      if (!/^\d+(\.\d{1,3})?$/.test(peso) || Number(peso) <= 0 || Number(peso) > 999999999.999) {
+        return 'Informe um peso positivo em kg, com até três casas decimais.';
+      }
+      const frequencia = Number(form.frequencia_dias);
+      if (!Number.isInteger(frequencia) || frequencia <= 0 || frequencia > 2147483647) return 'Informe uma frequência inteira positiva em dias.';
+    }
 
     if (
       etapa === 4 &&
@@ -102,52 +111,46 @@ export function useQuestionarioColeta() {
   }
 
   async function gerarPedido() {
+    if (envio.current) return;
     setErro("");
-
-    if (!localizacao) {
-      setErro("A localização ainda não foi carregada.");
-      return;
-    }
 
     if (!pontoSelecionado) {
       setErro("Escolha um ponto de coleta.");
       return;
     }
+    if (!pontos.some(p => p.id === pontoSelecionado.id) || carregandoPontos || erroPontos) {
+      setErro('Atualize a lista e escolha um ponto disponível.'); return;
+    }
+    const peso = Number(form.quantidade_kg.trim().replace(',', '.'));
+    if (pontoSelecionado.limite_kg_por_pedido != null && peso > Number(pontoSelecionado.limite_kg_por_pedido)) {
+      setErro('A quantidade excede o limite por pedido deste ponto. Ajuste a quantidade ou escolha outro ponto.'); return;
+    }
 
+    envio.current = true;
     setCarregando(true);
 
     try {
       const payload = {
         eh_mistura: Boolean(form.eh_mistura),
         residuo_principal: form.residuo_principal,
-        quantidade_kg: Number(form.quantidade_kg),
+        quantidade_kg: peso,
         frequencia_dias: Number(form.frequencia_dias),
         material: form.material,
         estado_material: form.estado_material,
         tipo_tecido: form.tipo_tecido,
-        lat: localizacao.lat,
-        lon: localizacao.lon,
         ponto_coleta_id: pontoSelecionado.id,
       };
 
       const resposta = await criarDescarte(payload);
 
-      localStorage.setItem(
-        `pedido-coleta-${resposta.protocolo}`,
-        JSON.stringify({
-          protocolo: resposta.protocolo,
-          descarte: payload,
-          pontoSelecionado,
-          criadoEm: new Date().toISOString(),
-          observacao:
-            "Ponto de coleta enviado ao backend por meio do campo ponto_coleta_id.",
-        })
-      );
-
+      // A localização do dispositivo serve apenas para ordenar os pontos.
+      // A confirmação não depende do armazenamento opcional no navegador.
       setProtocolo(resposta.protocolo);
-    } catch {
-      setErro("Não foi possível gerar o pedido de coleta.");
+      try { localStorage.setItem(`pedido-coleta-${resposta.protocolo}`, JSON.stringify({ protocolo: resposta.protocolo, pontoSelecionado, criadoEm: new Date().toISOString() })); } catch { /* Protocolo já confirmado na API. */ }
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : "Não foi possível gerar o pedido de coleta.");
     } finally {
+      envio.current = false;
       setCarregando(false);
     }
   }
@@ -159,6 +162,7 @@ export function useQuestionarioColeta() {
     setCarregando(false);
     setProtocolo("");
     setPontoSelecionado(null);
+    void carregarPontos();
   }
 
   return {
@@ -169,6 +173,9 @@ export function useQuestionarioColeta() {
     protocolo,
     localizacao,
     pontosOrdenados,
+    erroPontos,
+    carregandoPontos,
+    carregarPontos,
     pontoSelecionado,
     setPontoSelecionado,
     atualizarCampo,

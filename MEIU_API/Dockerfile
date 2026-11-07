@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN npm ci --no-audit --no-fund
 COPY tsconfig.json ./
 COPY src ./src
-RUN npm run build
+RUN npm run build && find dist -type f -name '*.map' -delete
 
 FROM node:24-alpine AS dependencies
 WORKDIR /app

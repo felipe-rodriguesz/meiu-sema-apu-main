@@ -8,13 +8,11 @@ interface UsuarioSema {
 
 interface NavbarProps {
   usuario: UsuarioSema | null;
-  token: string | null;
   onLogout: () => void;
 }
 
 export default function Navbar({
   usuario,
-  token,
   onLogout
 }: NavbarProps): React.JSX.Element {
   return (
@@ -35,7 +33,7 @@ export default function Navbar({
         </div>
       </div>
 
-      {token && usuario && (
+      {usuario && (
         <div className={styles.userArea}>
           <div className={styles.userInfo}>
             <span className={styles.greeting}>

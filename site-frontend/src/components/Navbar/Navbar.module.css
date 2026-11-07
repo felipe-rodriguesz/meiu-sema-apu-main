@@ -2,7 +2,7 @@
   width: 100%;
   background: linear-gradient(135deg, #1b4332, #2d6a4f);
   color: #fff;
-  padding: 18px 40px;
+  padding: 18px clamp(16px, 2vw, 32px);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
 
   display: flex;
@@ -18,9 +18,16 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.brandArea > div:last-child {
+  min-width: 0;
 }
 
 .logoBox {
+  flex-shrink: 0;
   width: 46px;
   height: 46px;
   border-radius: 12px;
@@ -52,6 +59,8 @@
 }
 
 .userArea {
+  max-width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 18px;
@@ -63,6 +72,8 @@
 }
 
 .userInfo {
+  min-width: 0;
+  overflow-wrap: anywhere;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -117,6 +128,7 @@
 
   .brandArea {
     width: 100%;
+    flex-basis: 100%;
   }
 
   .title {
@@ -153,4 +165,11 @@
   .logoutButton {
     width: 100%;
   }
+}
+
+@media (max-width: 768px) {
+  .header { gap: 14px; padding: 16px; }
+  .userArea { flex-direction: row; align-items: center; padding: 10px 12px; gap: 12px; }
+  .logoutButton { width: auto; flex-shrink: 0; min-height: 40px; }
+  .greeting { display: none; }
 }

@@ -5,48 +5,20 @@ export interface UsuarioSema {
   email: string;
 }
 
-interface LoginResponse {
-  access_token: string;
+interface SessionResponse {
   usuario: UsuarioSema;
 }
 
-export async function login(
-  email: string,
-  senha: string
-): Promise<LoginResponse> {
-  const response = await api.post<LoginResponse>('/auth/login', {
-    email,
-    senha
-  });
-
-  localStorage.setItem('token_sema', response.data.access_token);
-  localStorage.setItem(
-    'usuario_sema',
-    JSON.stringify(response.data.usuario)
-  );
-
-  return response.data;
+export async function login(email: string, senha: string): Promise<UsuarioSema> {
+  const response = await api.post<SessionResponse>('/auth/login', { email, senha });
+  return response.data.usuario;
 }
 
-export function getToken(): string | null {
-  return localStorage.getItem('token_sema');
+export async function getSession(): Promise<UsuarioSema> {
+  const response = await api.get<SessionResponse>('/auth/me');
+  return response.data.usuario;
 }
 
-export function getUsuario(): UsuarioSema | null {
-  const usuario = localStorage.getItem('usuario_sema');
-
-  if (!usuario) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(usuario) as UsuarioSema;
-  } catch {
-    return null;
-  }
-}
-
-export function logout(): void {
-  localStorage.removeItem('token_sema');
-  localStorage.removeItem('usuario_sema');
+export async function logout(): Promise<void> {
+  await api.post('/auth/logout');
 }

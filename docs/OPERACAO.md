@@ -12,7 +12,7 @@ Requer Docker com Compose. Na raiz do repositório:
 
 O banco usa volume persistente. `docker compose down` preserva o volume; **não use down -v** em um ambiente com dados que precisam ser mantidos. Banco e API não expõem portas diretamente ao host.
 
-Para desenvolvimento sem Docker: Node 24, PostgreSQL 16, `npm ci` em cada aplicação. Copie MEIU_API/.env.example para MEIU_API/.env, configure banco, JWT e CORS; execute `npm run build`, `npm run migration:run` e `npm run start:dev`. Configure VITE_API_URL=http://localhost:3001/api/v1 em cada frontend e execute `npm run dev -- --port 5173` no painel e `npm run dev -- --port 5174` no formulário.
+Para desenvolvimento sem Docker: Node 24, PostgreSQL 16, `npm ci` em cada aplicação. Copie MEIU_API/.env.example para MEIU_API/.env, configure banco, JWT e CORS; execute `npm run build`, `npm run migration:run` e `npm run start:dev`. Configure VITE_API_URL=http://localhost:3001/api/v1 em cada frontend e execute `npm run dev -- --port 5173` no painel e `npm run dev -- --port 5174` no formulário. No formulário, configure também VITE_PAINEL_URL=http://localhost:5173/ para o QR Code. Em produção com interfaces separadas, use o endereço HTTPS real do painel e reconstrua o formulário; a URL é definida na compilação.
 
 ## Criar conta administrativa
 
@@ -43,6 +43,16 @@ Não use synchronize=true. Tabelas.sql é somente uma referência da estrutura: 
 
 ## Operar o recebimento
 
+Antes da divulgação, abra **Pontos de coleta** e cadastre o local no mapa. Confira nome, modalidade, endereço e bairro à direita (o preenchimento manual continua disponível). A seção **Condições de atendimento** fica abaixo, ocupando toda a largura. Use **Editar ponto** para atualizar e **Desativar Ponto** ao encerrar.
+
+Informe o início e o fim no **Horário padrão** e selecione os dias que o utilizam. Para uma exceção, clique em **Personalizar** ao lado do dia. **Usar padrão** restaura o intervalo comum. Alterar o padrão atualiza os dias selecionados, preservando as exceções. Ao reabrir o cadastro, o intervalo mais frequente é exibido como padrão. A duração é calculada automaticamente; o fim precisa ser posterior ao início, no mesmo dia. Ao desmarcar um dia, seu horário é removido do formulário. As datas de início/fim do período de atendimento não são mais utilizadas na interface.
+
+Marque os tipos de resíduos aceitos na lista. Para um material não listado, selecione **Outro**, digite o nome e clique em **Adicionar** (ou Enter). É possível adicionar mais de um, remover individualmente pelo × e desmarcar Outro para retirar as opções personalizadas. Esses materiais pertencem somente ao ponto editado; não mudam a lista dos demais pontos.
+
+Dias e horários orientam a entrega presencial; não são agenda ou autorização prévia. É possível registrar antecipadamente enquanto o ponto estiver ativo. Desative-o quando não puder receber. O limite é por pedido, aplicado ao peso declarado; não é limite por pessoa ou controle de estoque/capacidade diária. Materiais aceitos são instruções para conferência presencial, sem classificação automática por texto.
+
+No formulário, localização negada/ausente não impede o registro. A localização do aparelho apenas ordena os pontos por proximidade; não é enviada como origem do resíduo. Pontos sem coordenadas continuam selecionáveis pela lista. O protocolo e o QR são apresentados mesmo se o navegador bloquear armazenamento local. Baixe o QR ou guarde o número antes de sair da tela. O QR contém somente o link do painel/protocolo; a consulta exige login.
+
 1. Entre no painel e abra Pedidos de coleta.
 2. Digite o protocolo ou abra o link do pedido fornecido pelo QR Code.
 3. Confira o ponto, o material e a pesagem.
@@ -54,6 +64,16 @@ O horário e o operador são definidos no servidor. Um segundo envio retorna con
 Para corrigir peso, abra o pedido recebido, escolha Corrigir peso com justificativa, informe o novo valor e o motivo. O peso declarado e a data/operador do recebimento original são preservados. Se outro operador corrigir primeiro, atualize a consulta antes de tentar novamente.
 
 Pontos inativos não aceitam novos pedidos; pedidos já registrados continuam disponíveis para recebimento. Um pedido antigo sem ponto vinculado exige revisão do cadastro, sem confirmação automática. A confirmação representa recebimento, não comprovação da destinação posterior.
+
+## Consultar relatórios e exportar
+
+Abra **Relatórios**, escolha o período por data de registro ou de recebimento e aplique os filtros de ponto, tipo de resíduo e situação. Os cartões e agrupamentos mostram registros, pendências, recebimentos e pesos declarados/recebidos separados. Registros não equivalem a geradores únicos. Correções atualizam o peso recebido sem contar um novo atendimento.
+
+Os filtros aplicados aparecem acima dos totais. Ao alterar algum campo, aplique os filtros antes de exportar; o aviso e o botão desabilitado evitam baixar resultados desatualizados em relação à seleção.
+
+**Exportar CSV dos filtros aplicados** usa a mesma consulta e inclui todos os registros filtrados, mesmo quando a tabela mostra inicialmente apenas 100. O arquivo usa UTF-8 com BOM, ponto e vírgula, vírgula decimal e três casas nos pesos. Valores de texto que poderiam virar fórmulas em planilhas recebem um apóstrofo de proteção. Sem resultados, o arquivo contém somente o cabeçalho.
+
+O intervalo inclui os dois dias. Datas de recebimento usam America/Sao_Paulo. Datas de registro usam o calendário gravado no campo legado sem fuso; o relatório não reinterpreta dados antigos. Não compare ambientes com convenções diferentes sem conferir esse campo. Filtrar por recebimento exclui registros ainda não recebidos. CSV e tela consultam o banco no momento de cada solicitação; atualize a tela se houver atendimentos simultâneos.
 
 ## Backup e restauração
 
@@ -72,6 +92,10 @@ Antes de uso real, o mantenedor deve definir frequência, retenção e armazenam
 
 ## Publicação HTTPS
 
+O acesso administrativo usa cookie de sessão HttpOnly, Secure em produção e SameSite=Strict; o token não deve ser copiado para armazenamento do navegador ou incluído em links. Configure CORS_ORIGINS somente com as origens reais do painel. As alterações autenticadas exigem essa origem. Login e cadastro público são limitados por IP em janelas de 15 minutos (15 e 30 solicitações, respectivamente); respostas 429 incluem Retry-After. Os contadores ficam na memória da API e atendem à implantação atual com uma instância. Caso a API passe a ter várias instâncias, use um armazenamento compartilhado para manter o mesmo limite entre elas.
+
+Na configuração Compose, TRUST_PROXY_HOPS=2 corresponde a Caddy e Nginx na frente da API. Ao mudar a topologia, ajuste esse número de acordo com os proxies confiáveis; não habilite confiança irrestrita em cabeçalhos enviados pelo cliente. O servidor web envia política de conteúdo e demais cabeçalhos de segurança; confira-os no domínio publicado. A rotina automática em `.github/workflows/security.yml` verifica dependências de produção em cada projeto e bloqueia avisos altos ou críticos quando as alterações forem enviadas ao repositório.
+
 A configuração está preparada para um servidor Docker com domínio próprio:
 
 1. Defina o mantenedor, a hospedagem e o acesso administrativo ao servidor.
@@ -88,7 +112,7 @@ O banco do Compose fica na rede interna. Para PostgreSQL remoto, configure a API
 
 Utilize ambientes e bancos diferentes para demonstração e operação real. Não divulgue uma instalação que contenha pontos fictícios como pontos reais.
 
-Formulário sem localização, configuração operacional dos pontos, QR Code e relatórios/CSV ainda dependem da frente de José. A API e o painel de recebimento estão prontos para integrar essas funcionalidades. Notícias continuam opcionais.
+Formulário sem localização, configuração operacional dos pontos, QR Code e relatórios/CSV estão consolidados na versão da equipe. Veja [Implementação](IMPLEMENTACAO-LOCAL-JOSE.md) e [publicação no Render](RENDER.md). Notícias e melhorias adicionais não foram implementadas.
 
 A ativação pública depende também de conferir a infraestrutura escolhida, monitoramento, política de acessos e proteção contra abuso das rotas públicas/login. Os testes controlados desta entrega não são um piloto com a SEMA.
 

@@ -16,6 +16,10 @@ test('configuração recusa segredo fraco e origem curinga', () => {
   assert.equal(validateEnvironment(valid).PORT, 3001);
   assert.equal(databaseOptions({ ...valid, DATABASE_SSL: 'true' }).ssl.rejectUnauthorized, true);
   assert.ok(!databaseOptions({ ...valid, DATABASE_URL: valid.DATABASE_URL + '?sslmode=no-verify', DATABASE_SSL: 'true' }).url.includes('sslmode'));
+  const { sessionCookieOptions, sessionCookieName } = require('../dist/modules/auth/session-cookie');
+  assert.deepEqual(sessionCookieOptions(true), { httpOnly: true, secure: true, sameSite: 'strict', path: '/', maxAge: 28800000 });
+  assert.equal(sessionCookieName(true), '__Host-sema_session');
+  assert.equal(sessionCookieOptions(false).secure, false);
 });
 
 test('API com PostgreSQL real: migrações, segurança, recebimento e concorrência', { timeout: 120000 }, async t => {
@@ -60,7 +64,7 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
     await assert.rejects(db.runMigrations({ transaction: 'all' }), /pesos\/frequências inválidos/);
     assert.equal((await db.query('SELECT quantidade_kg FROM descarte WHERE id=$1', [oldId]))[0].quantidade_kg, -1);
     await db.query('UPDATE descarte SET quantidade_kg=5 WHERE id=$1', [oldId]);
-    assert.equal((await db.runMigrations({ transaction: 'all' })).length, 3);
+    assert.equal((await db.runMigrations({ transaction: 'all' })).length, 5);
     assert.equal((await db.runMigrations()).length, 0);
     const [old] = await db.query('SELECT * FROM descarte WHERE id=$1', [oldId]);
     assert.equal(Number(old.quantidade_kg), 5);
@@ -72,9 +76,15 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
     const url = new URL(process.env.DATABASE_URL); url.pathname = '/' + freshName;
     fresh = new DataSource({ ...source.options, url: url.toString() });
     await fresh.initialize();
-    assert.equal((await fresh.runMigrations()).length, 3);
-    const columns = async connection => connection.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name='descarte' ORDER BY ordinal_position");
+    assert.equal((await fresh.runMigrations()).length, 5);
+    const columns = async connection => connection.query("SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_name IN ('descarte','ponto_coleta') ORDER BY table_name, ordinal_position");
     assert.deepEqual(await columns(fresh), await columns(db));
+    await fresh.undoLastMigration();
+    await fresh.query("INSERT INTO ponto_coleta(nome,tipo,dias_semana,horario_inicio,horario_fim,materiais_aceitos) VALUES ('Legado', 'Ponto Fixo', ARRAY[1,5], '09:00', '17:00', 'Retalhos; algodão limpo')");
+    assert.equal((await fresh.runMigrations()).length, 1);
+    const [migrated] = await fresh.query('SELECT horarios_semana,materiais_lista FROM ponto_coleta');
+    assert.deepEqual(migrated.horarios_semana, [{dia:1,inicio:'09:00',fim:'17:00'},{dia:5,inicio:'09:00',fim:'17:00'}]);
+    assert.deepEqual(migrated.materiais_lista, ['Retalhos; algodão limpo']);
   });
 
   const password = randomBytes(20).toString('hex');
@@ -87,11 +97,11 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
   app = await NestFactory.create(AppModule, { logger: ['error'], abortOnError: false });
   configureApp(app);
   await app.listen(0, '127.0.0.1');
-  const endpoint = await app.getUrl() + '/api/v1';
+  let endpoint = await app.getUrl() + '/api/v1';
   let token, token2, point, pending, receipt;
   const request = async (method, path, body, auth = token, headers = {}) => {
     const response = await fetch(endpoint + path, {
-      method, headers: { 'Content-Type': 'application/json', ...(auth ? { Authorization: 'Bearer ' + auth } : {}), ...headers },
+      method, headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:5173', ...(auth ? { Cookie: auth } : {}), ...headers },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
     const text = await response.text();
@@ -101,18 +111,26 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
   await t.test('login, token inválido/expirado e usuário removido', async () => {
     assert.equal((await request('POST', '/auth/login', { email: 'operador@example.test', senha: 'errada' }, null)).status, 401);
     const logged = await request('POST', '/auth/login', { email: 'operador@example.test', senha: password }, null);
-    assert.equal(logged.status, 201); token = logged.body.access_token;
-    token2 = (await request('POST', '/auth/login', { email: 'dois@example.test', senha: password }, null)).body.access_token;
-    assert.equal((await request('GET', '/descartes', undefined, 'invalido')).status, 401);
+    assert.equal(logged.status, 201); token = logged.headers.get('set-cookie').split(';')[0];
+    assert.equal(logged.body.access_token, undefined);
+    assert.equal(logged.headers.get('cache-control'), 'no-store');
+    assert.match(logged.headers.get('set-cookie'), /HttpOnly/);
+    assert.match(logged.headers.get('set-cookie'), /SameSite=Strict/);
+    assert.deepEqual((await request('GET', '/auth/me')).body.usuario, { nome: 'Operador Teste', email: 'operador@example.test' });
+    token2 = (await request('POST', '/auth/login', { email: 'dois@example.test', senha: password }, null)).headers.get('set-cookie').split(';')[0];
+    assert.equal((await request('GET', '/descartes', undefined, 'sema_session=invalido')).status, 401);
     const jwt = app.get(JwtService);
     const expired = jwt.sign({ sub: operator }, { expiresIn: -1 });
-    assert.equal((await request('GET', '/descartes', undefined, expired)).status, 401);
+    assert.equal((await request('GET', '/descartes', undefined, 'sema_session=' + expired)).status, 401);
     const absent = jwt.sign({ sub: randomUUID() });
-    assert.equal((await request('GET', '/descartes', undefined, absent)).status, 401);
+    assert.equal((await request('GET', '/descartes', undefined, 'sema_session=' + absent)).status, 401);
+    assert.equal((await request('GET', '/descartes', undefined, null, { Authorization: 'Bearer ' + jwt.sign({ sub: operator }) })).status, 401);
+    assert.equal((await request('POST', '/auth/logout', undefined, token, { Origin: 'https://outro.example' })).status, 403);
+    assert.equal((await request('POST', '/auth/logout', undefined, token, { Origin: '' })).status, 403);
   });
 
   await t.test('admin protegido; formulário, pontos ativos e notícias públicos', async () => {
-    for (const path of ['/descartes', '/stats/latest', '/pontos-coleta/admin', '/descartes/protocolo/TX-LEGADO']) {
+    for (const path of ['/descartes', '/stats/latest', '/pontos-coleta/admin', '/descartes/protocolo/TX-LEGADO', '/relatorios', '/relatorios/csv']) {
       assert.equal((await request('GET', path, undefined, null)).status, 401, path);
     }
     assert.equal((await request('GET', '/pontos-coleta', undefined, null)).status, 200);
@@ -214,18 +232,163 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
   await t.test('banco impede recebimento incompleto e remoção de histórico vinculado', async () => {
     await assert.rejects(db.query("UPDATE descarte SET situacao='RECEBIDO' WHERE id=$1", [pending.id]), { code: '23514' });
     await assert.rejects(db.query('DELETE FROM descarte WHERE id=$1', [receipt.id]), { code: '23503' });
-    await assert.rejects(db.undoLastMigration(), /existem recebimentos/);
+    const { Receipts1793232002000 } = require('../dist/database/migrations/1793232002000-receipts');
+    const runner = db.createQueryRunner();
+    try { await assert.rejects(new Receipts1793232002000().down(runner), /existem recebimentos/); }
+    finally { await runner.release(); }
+  });
+
+  await t.test('ponto editável, campos operacionais, limites e validação preservam o histórico', async () => {
+    const fields = { nome: 'Ponto configurável', tipo: 'Ponto Fixo', dias_semana: [1,3,5],
+      data_inicio: '2026-10-30', data_fim: '2026-11-30', horario_inicio: '09:00', horario_fim: '17:00',
+      materiais_aceitos: 'Retalhos limpos', limite_kg_por_pedido: 2.5, orientacoes: 'Levar o protocolo', lat: -23.55, lon: -51.46 };
+    const created = await request('POST', '/pontos-coleta', fields);
+    assert.equal(created.status, 201);
+    const id = created.body.id;
+    assert.equal((await request('PUT', '/pontos-coleta/' + id, fields, null)).status, 401);
+    for (const change of [{ dias_semana: [7] }, { dias_semana: [1,1] }, { dias_semana: null, nome: null },
+      { data_inicio: '2026-02-30' }, { data_inicio: '2026-12-01' }, { horario_fim: '08:00' },
+      { horario_fim: null }, { limite_kg_por_pedido: 0 }, { limite_kg_por_pedido: 2.5001 }, { lon: null }]) {
+      assert.equal((await request('PUT', '/pontos-coleta/' + id, { ...fields, ...change })).status, 400, JSON.stringify(change));
+    }
+    assert.equal((await create({ ponto_coleta_id: id, quantidade_kg: 2.501 })).status, 400);
+    const registered = await create({ ponto_coleta_id: id, quantidade_kg: 2.5 });
+    assert.equal(registered.status, 201);
+    const changed = await request('PUT', '/pontos-coleta/' + id, { ...fields, nome: 'Novo nome', limite_kg_por_pedido: null, dias_semana: [] });
+    assert.equal(changed.status, 200); assert.equal(changed.body.limite_kg_por_pedido, null);
+    const publicPoint = (await request('GET', '/pontos-coleta', undefined, null)).body.find(p => p.id === id);
+    assert.equal(publicPoint.nome, 'Novo nome'); assert.equal(publicPoint.orientacoes, fields.orientacoes);
+    assert.equal(publicPoint.horario_inicio, '09:00'); assert.deepEqual(publicPoint.dias_semana, []);
+    const detail = (await request('GET', '/descartes/protocolo/' + registered.body.protocolo)).body;
+    assert.equal(detail.quantidade_kg, 2.5); assert.equal(detail.ponto_coleta.id, id);
+    assert.equal((await request('PUT', '/pontos-coleta/' + randomUUID(), fields)).status, 404);
+    const { PointOperation1793232003000 } = require('../dist/database/migrations/1793232003000-point-operation');
+    const runner = db.createQueryRunner();
+    try { await assert.rejects(new PointOperation1793232003000().down(runner), /condições de atendimento cadastradas/); }
+    finally { await runner.release(); }
+  });
+
+  await t.test('horários por dia e materiais múltiplos são validados e persistidos', async () => {
+    const fields = { nome: 'Agenda semanal', tipo: 'Ponto Fixo',
+      horarios_semana: [{dia:1,inicio:'09:00',fim:'17:00'},{dia:5,inicio:'10:00',fim:'15:30'}],
+      materiais_lista: ['Retalho de corte', 'Material especial deste ponto'] };
+    const created = await request('POST','/pontos-coleta',fields);
+    assert.equal(created.status,201);
+    assert.deepEqual(created.body.horarios_semana,fields.horarios_semana);
+    assert.deepEqual(created.body.materiais_lista,fields.materiais_lista);
+    assert.equal(created.body.data_inicio,null); assert.equal(created.body.data_fim,null);
+    for (const change of [
+      {horarios_semana:[{dia:7,inicio:'09:00',fim:'17:00'}]},
+      {horarios_semana:[{dia:1,inicio:'17:00',fim:'09:00'}]},
+      {horarios_semana:[{dia:1,inicio:'09:00',fim:'09:00'}]},
+      {horarios_semana:[{dia:1,inicio:'09:00'}]},
+      {horarios_semana:[{dia:1,inicio:'25:00',fim:'26:00'}]},
+      {horarios_semana:[fields.horarios_semana[0],fields.horarios_semana[0]]},
+      {materiais_lista:['  ']}, {materiais_lista:['Algodão','algodão']},
+      {materiais_lista:[1]}, {materiais_lista:Array.from({length:51},(_,i)=>'Material '+i)}
+    ]) assert.equal((await request('PUT','/pontos-coleta/'+created.body.id,{...fields,...change})).status,400,JSON.stringify(change));
+    const changed = await request('PUT','/pontos-coleta/'+created.body.id,{
+      ...fields,horarios_semana:[fields.horarios_semana[1]],materiais_lista:['Material especial deste ponto']
+    });
+    assert.equal(changed.status,200);
+    const publicPoint = (await request('GET','/pontos-coleta',undefined,null)).body.find(p=>p.id===created.body.id);
+    assert.deepEqual(publicPoint.horarios_semana,[fields.horarios_semana[1]]);
+    assert.deepEqual(publicPoint.dias_semana,[5]);
+    assert.deepEqual(publicPoint.materiais_lista,['Material especial deste ponto']);
+    const cleared = await request('PUT','/pontos-coleta/'+created.body.id,{...fields,horarios_semana:[],materiais_lista:[]});
+    assert.deepEqual(cleared.body.horarios_semana,[]); assert.deepEqual(cleared.body.materiais_lista,[]);
+  });
+
+  await t.test('relatórios e CSV: filtros, somas decimais, correção, fuso e exportação vazia', async () => {
+    const p = (await request('POST', '/pontos-coleta', { nome: '=Ponto;"teste"', tipo: 'Ponto Fixo' })).body;
+    const a = await create({ ponto_coleta_id: p.id, quantidade_kg: 10, material: 'Algodão; "limpo"\nseco' });
+    const b = await create({ ponto_coleta_id: p.id, quantidade_kg: 2.5, residuo_principal: 'Fios' });
+    const da = (await request('GET', '/descartes/protocolo/' + a.body.protocolo)).body;
+    const dbb = (await request('GET', '/descartes/protocolo/' + b.body.protocolo)).body;
+    assert.equal((await request('POST', '/descartes/' + da.id + '/recebimento', { peso_recebido_kg: 8.7 })).status, 200);
+    assert.equal((await request('PATCH', '/descartes/' + da.id + '/recebimento', { peso_recebido_kg: 8.6, versao: 1, motivo: 'Aferição controlada' })).status, 200);
+    await db.query("UPDATE descarte SET criado_em='2026-10-30 23:59:59', recebido_em='2026-11-01T02:30:00Z' WHERE id=$1", [da.id]);
+    await db.query("UPDATE descarte SET criado_em='2026-10-31 00:00:00' WHERE id=$1", [dbb.id]);
+    const filtro = '?ponto_coleta_id=' + p.id;
+    const all = (await request('GET', '/relatorios' + filtro)).body;
+    assert.deepEqual(all.totais, { registros: 2, pendentes: 1, recebidos: 1, peso_declarado_kg: 12.5, peso_recebido_kg: 8.6 });
+    assert.deepEqual(all.por_ponto[0], { chave: p.id, nome: p.nome, ...all.totais });
+    assert.equal(all.por_residuo.find(r => r.nome === 'Retalhos').peso_recebido_kg, 8.6);
+    assert.equal(all.registros.length, 2);
+    const day = (await request('GET', '/relatorios' + filtro + '&inicio=2026-10-30&fim=2026-10-30')).body;
+    assert.equal(day.totais.registros, 1); assert.equal(day.registros[0].protocolo, a.body.protocolo);
+    const received = (await request('GET', '/relatorios' + filtro + '&base_data=recebimento&inicio=2026-10-31&fim=2026-10-31&situacao=RECEBIDO&residuo_principal=Retalhos')).body;
+    assert.equal(received.totais.registros, 1); assert.equal(received.totais.peso_recebido_kg, 8.6);
+    assert.equal(received.registros[0].recebido_em, '2026-10-31 23:30:00');
+    const emptyFilter = filtro + '&base_data=recebimento&inicio=2026-11-01&fim=2026-11-01';
+    const empty = (await request('GET', '/relatorios' + emptyFilter)).body;
+    assert.deepEqual(empty.totais, { registros: 0, pendentes: 0, recebidos: 0, peso_declarado_kg: 0, peso_recebido_kg: 0 });
+    assert.deepEqual(empty.registros, []); assert.deepEqual(empty.por_ponto, []); assert.deepEqual(empty.por_residuo, []);
+    for (const filter of ['?inicio=2026-11-01&fim=2026-10-30', '?inicio=2026-02-30', '?base_data=invalida', '?situacao=APROVADO', '?ponto_coleta_id=texto', '?campo_inventado=1']) {
+      assert.equal((await request('GET', '/relatorios' + filter)).status, 400, filter);
+    }
+    // Ler CSV com aspas, ponto e vírgula e quebras de linha nos campos.
+    function parseCsv(text) {
+      const rows = []; let row = [], field = '', quoted = false;
+      text = text.replace(/^\uFEFF/, '');
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') { if (quoted && text[i + 1] === '"') { field += '"'; i++; } else quoted = !quoted; }
+        else if (!quoted && c === ';') { row.push(field); field = ''; }
+        else if (!quoted && c === '\n') { row.push(field.replace(/\r$/, '')); rows.push(row); row = []; field = ''; }
+        else field += c;
+      }
+      return rows;
+    }
+    const csv = async filter => {
+      const response = await fetch(endpoint + '/relatorios/csv' + filter, { headers: { Cookie: token } });
+      assert.equal(response.status, 200); assert.match(response.headers.get('content-type'), /text\/csv/);
+      return parseCsv(await response.text());
+    };
+    const rows = await csv(filtro);
+    assert.equal(rows.length, 3);
+    const data = rows.slice(1);
+    assert.deepEqual(new Set(data.map(r => r[0])), new Set(all.registros.map(r => r.protocolo)));
+    assert.equal(data.reduce((sum, r) => sum + Math.round(Number(r[5].replace(',', '.')) * 1000), 0) / 1000, all.totais.peso_declarado_kg);
+    assert.equal(data.reduce((sum, r) => sum + Math.round(Number(r[6].replace(',', '.')) * 1000), 0) / 1000, all.totais.peso_recebido_kg);
+    assert.equal(data[0][3], "'" + p.nome);
+    assert.equal(data.find(r => r[0] === a.body.protocolo)[10], 'Algodão; "limpo"\nseco');
+    assert.equal((await csv(emptyFilter)).length, 1);
+    assert.equal((await csv(filtro + '&situacao=PENDENTE'))[1][0], b.body.protocolo);
   });
 
   await t.test('reinício da API preserva recebimento; estatísticas existentes são declaradas', async () => {
     await app.close();
     app = await NestFactory.create(AppModule, { logger: ['error'], abortOnError: false }); configureApp(app);
     await app.listen(0, '127.0.0.1');
-    const response = await fetch(await app.getUrl() + '/api/v1/descartes/protocolo/' + receipt.protocolo, { headers: { Authorization: 'Bearer ' + token } });
+    endpoint = await app.getUrl() + '/api/v1';
+    const response = await fetch(await app.getUrl() + '/api/v1/descartes/protocolo/' + receipt.protocolo, { headers: { Cookie: token } });
     const data = await response.json();
     assert.equal(data.historico.length, 2); assert.equal(data.quantidade_kg, 10); assert.equal(data.situacao, 'RECEBIDO');
-    const statsResponse = await fetch(await app.getUrl() + '/api/v1/stats/latest', { headers: { Authorization: 'Bearer ' + token } });
+    const statsResponse = await fetch(await app.getUrl() + '/api/v1/stats/latest', { headers: { Cookie: token } });
     const stats = await statsResponse.json();
     assert.equal(stats.total_kg, Number((await db.query('SELECT sum(quantidade_kg) AS kg FROM descarte'))[0].kg));
+  });
+
+  await t.test('sessão, origem e limites de requisições na API', async () => {
+    assert.equal((await request('POST', '/pontos-coleta', { nome: 'Bloqueado', tipo: 'Ponto Fixo' }, token, { Origin: 'https://outro.example' })).status, 403);
+    assert.equal((await request('POST', '/pontos-coleta', { nome: 'Bloqueado', tipo: 'Ponto Fixo' }, token, { Origin: '' })).status, 403);
+    const logout = await request('POST', '/auth/logout', undefined, token);
+    assert.equal(logout.status, 201);
+    assert.match(logout.headers.get('set-cookie'), /Expires=Thu, 01 Jan 1970/);
+    assert.equal((await request('GET', '/auth/me', undefined, null)).status, 401);
+    for (let i = 0; i < 15; i++) {
+      const result = await request('POST', '/auth/login', { email: 'operador@example.test', senha: 'errada' }, null, { 'X-Forwarded-For': '198.51.100.' + i });
+      assert.equal(result.status, 401, 'login ' + i);
+    }
+    const limitedLogin = await request('POST', '/auth/login', { email: 'operador@example.test', senha: 'errada' }, null);
+    assert.equal(limitedLogin.status, 429);
+    assert.ok(Number(limitedLogin.headers.get('retry-after')) > 0);
+    assert.equal((await request('POST', '/AUTH/LOGIN/', { email: 'operador@example.test', senha: 'errada' }, null)).status, 429);
+    for (let i = 0; i < 30; i++) assert.equal((await request('POST', '/descartes', {}, null)).status, 400, 'registro ' + i);
+    const limitedRegistration = await request('POST', '/descartes', {}, null);
+    assert.equal(limitedRegistration.status, 429);
+    assert.ok(Number(limitedRegistration.headers.get('retry-after')) > 0);
+    assert.equal((await request('POST', '/DESCARTES/', {}, null)).status, 429);
   });
 });
