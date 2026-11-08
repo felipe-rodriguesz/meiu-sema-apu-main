@@ -21,4 +21,8 @@ Os testes criaram somente dados fictícios no ambiente local isolado. Ainda não
 
 Render gratuito escolhido por Felipe. A configuração mantém formulário, painel e API na mesma origem HTTPS, com PostgreSQL separado e migrações no início. O workflow foi criado, mas o GitHub bloqueou a execução por restrição de cobrança/limite da conta. Até regularizar, novas publicações são manuais, após validar localmente compilações, dependências e testes.
 
-A liberação do endereço público depende de concluir a conexão do repositório ao Render, criar os serviços gratuitos, cadastrar o operador e validar o fluxo/backup no ambiente publicado. A expiração do banco gratuito deve ser registrada a partir da data efetiva de criação.
+Em 08/11/2026, o Render mostrava o commit `6a9c463` ativo no plano gratuito. O [formulário](https://meiu-sema-apucarana.onrender.com/) e o [painel](https://meiu-sema-apucarana.onrender.com/admin/) responderam por HTTPS. A listagem pública respondeu com sucesso, a API administrativa retornou 401 sem sessão e a tentativa de acessar `/.env` retornou 404. CSP e HSTS estavam presentes nas respostas.
+
+O primeiro operador foi cadastrado. O login, o cookie seguro, a consulta de sessão, os relatórios e a exportação CSV foram conferidos por HTTPS. O backup inicial do Render foi restaurado em um banco local isolado, com um operador e sem pedidos ou eventos. O acesso externo ao PostgreSQL foi bloqueado novamente após a manutenção.
+
+O banco `meiu-sema-db` expira em **06/12/2026**, conforme o painel do Render. Exporte uma cópia atualizada antes dessa data.

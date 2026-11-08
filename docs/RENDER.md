@@ -33,7 +33,7 @@ Em máquina com Docker, disponibilize a URL **externa** do banco apenas na vari�
 
 O comando usa PostgreSQL 16, exige TLS com verificação do certificado e grava um arquivo `.dump` em `.local/backups`, ignorado pelo Git. Retire DATABASE_URL da sessão ao terminar. Guarde uma segunda cópia em armazenamento externo privado da equipe.
 
-Para conferir a recuperação, restaure o arquivo em um banco local novo com `scripts/Restore-Backup.ps1`. Esse script recusa sobrescrever bancos existentes. Compare pedidos, pesos e histórico com a origem. O CSV dos relatórios não substitui o backup do banco.
+Para conferir a recuperação, restaure o arquivo em um banco local novo com `scripts/Restore-Backup.ps1`. O script usa o usuário local como proprietário, ignora permissões específicas do provedor e recusa sobrescrever bancos existentes. Compare pedidos, pesos e histórico com a origem. O CSV dos relatórios não substitui o backup do banco.
 
 ## Segurança e atualização
 
