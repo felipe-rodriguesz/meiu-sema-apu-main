@@ -48,3 +48,5 @@ Reinícios não apagam o PostgreSQL, mas reiniciam os contadores de limite de re
 Serviço Live em `6a9c463`, banco disponível e acesso externo bloqueado. Expiração exibida: **06/12/2026**. A main `ac62dbc` acrescentava somente documentação e ajuste do script local de restauração; não exigia recompilar a aplicação. A revisão documental de 09/11 também não altera a aplicação publicada.
 
 A conexão interna usa `DATABASE_SSL=false` no Blueprint; não confundir rede privada com TLS. Manutenção externa exige verificação de certificado. O plano atual não é hospedagem permanente. A configuração de cobrança adicional/alertas personalizados ainda precisa de confirmação; recursos Free não demonstram por si só um teto de gastos da conta.
+
+Atualização posterior em 09/11/2026: commit `7820332` publicado manualmente com sucesso (Live), incluindo a regularização de lint. Acesso público, login e relatórios/CSV conferidos após a publicação. Nenhum pedido de teste foi criado em produção.
