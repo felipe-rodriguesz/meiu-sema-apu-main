@@ -35,8 +35,8 @@ export default function PedidosColeta(): React.JSX.Element {
   const [motivo, setMotivo] = useState('');
   const [corrigindo, setCorrigindo] = useState(false);
   const [conferido, setConferido] = useState(false);
-  const [carregando, setCarregando] = useState(false);
-  const [buscando, setBuscando] = useState(false);
+  const [carregando, setCarregando] = useState(true);
+  const [buscando, setBuscando] = useState(() => Boolean(new URLSearchParams(location.search).get('protocolo')?.trim()));
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
   const [erroPedido, setErroPedido] = useState('');
@@ -45,36 +45,45 @@ export default function PedidosColeta(): React.JSX.Element {
   const saving = useRef(false);
   const detailSequence = useRef(0);
 
-  const carregar = useCallback(async () => {
-    setCarregando(true); setErro('');
-    try { setPedidos((await api.get<Pedido[]>('/descartes')).data); }
-    catch (error) { setErro(message(error)); }
-    finally { setCarregando(false); }
+  const consultarLista = useCallback(() => {
+    return api.get<Pedido[]>('/descartes')
+      .then(response => { setPedidos(response.data); })
+      .catch(error => { setErro(message(error)); })
+      .finally(() => { setCarregando(false); });
   }, []);
 
-  const abrir = useCallback(async (codigo: string) => {
+  const carregar = () => {
+    setCarregando(true); setErro('');
+    return consultarLista();
+  };
+
+  const consultarPedido = useCallback((codigo: string) => {
     if (!codigo.trim()) return;
     const sequence = ++detailSequence.current;
-    setBuscando(true); setErro(''); setErroPedido(''); setSucesso('');
-    try {
-      const pedido = (await api.get<Pedido>('/descartes/protocolo/' + encodeURIComponent(codigo.trim()))).data;
+    return api.get<Pedido>('/descartes/protocolo/' + encodeURIComponent(codigo.trim())).then(({ data: pedido }) => {
       if (sequence !== detailSequence.current) return;
       setSelecionado(pedido); setPeso(''); setMotivo(''); setCorrigindo(false); setConferido(false);
       const url = new URL(location.href);
       url.searchParams.set('protocolo', pedido.protocolo);
       history.replaceState(null, '', url);
-    } catch (error) {
+    }).catch(error => {
       if (sequence === detailSequence.current) setErro(message(error));
-    } finally {
+    }).finally(() => {
       if (sequence === detailSequence.current) setBuscando(false);
-    }
+    });
   }, []);
 
+  const abrir = (codigo: string) => {
+    if (!codigo.trim()) return;
+    setBuscando(true); setErro(''); setErroPedido(''); setSucesso('');
+    return consultarPedido(codigo);
+  };
+
   useEffect(() => {
-    void carregar();
+    void consultarLista();
     const initial = new URLSearchParams(location.search).get('protocolo');
-    if (initial) void abrir(initial);
-  }, [carregar, abrir]);
+    if (initial) void consultarPedido(initial);
+  }, [consultarLista, consultarPedido]);
 
   useEffect(() => {
     if (selecionado && !dialog.current?.open) dialog.current?.showModal();

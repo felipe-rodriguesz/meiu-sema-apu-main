@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   MapContainer,
   TileLayer,
@@ -121,22 +121,24 @@ export default function CadastroPontoColeta(): React.JSX.Element {
     endereco: ''
   });
 
-  const buscarPontos = async (): Promise<void> => {
-    setCarregandoPontos(true);
-    try {
-      setErroPontos('');
-      const response = await api.get<PontoColeta[]>('/pontos-coleta/admin');
+  const consultarPontos = useCallback((): Promise<void> => {
+    return api.get<PontoColeta[]>('/pontos-coleta/admin')
+      .then(response => { setPontos(response.data); })
+      .catch(error => {
+        setErroPontos('Não foi possível carregar os pontos. Tente atualizar a lista.');
+        console.error('Erro ao buscar pontos:', error);
+      })
+      .finally(() => { setCarregandoPontos(false); });
+  }, []);
 
-      setPontos(response.data);
-    } catch (error) {
-      setErroPontos('Não foi possível carregar os pontos. Tente atualizar a lista.');
-      console.error('Erro ao buscar pontos:', error);
-    } finally { setCarregandoPontos(false); }
+  const buscarPontos = () => {
+    setCarregandoPontos(true); setErroPontos('');
+    return consultarPontos();
   };
 
   useEffect(() => {
-    buscarPontos();
-  }, []);
+    void consultarPontos();
+  }, [consultarPontos]);
 
   useEffect(() => () => consultaEndereco.current?.abort(), []);
 
@@ -239,18 +241,16 @@ export default function CadastroPontoColeta(): React.JSX.Element {
       setSucesso(editando == null ? 'Ponto de coleta registrado com sucesso!' : 'Ponto de coleta atualizado com sucesso!');
       limpar();
       void buscarPontos();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
 
-      if (
-        error.response?.status === 401 ||
-        error.response?.status === 403
-      ) {
+      const resposta = axios.isAxiosError<{ message?: string | string[] }>(error) ? error.response : undefined;
+      if (resposta?.status === 401 || resposta?.status === 403) {
         alert(
           'Sua sessão expirou. Por favor, saia e faça login novamente.'
         );
       } else {
-        alert([].concat(error.response?.data?.message || 'Erro ao salvar o ponto de coleta.').join(' '));
+        alert([resposta?.data?.message || 'Erro ao salvar o ponto de coleta.'].flat().join(' '));
       }
     } finally { envio.current = false; setSalvando(false); }
   };

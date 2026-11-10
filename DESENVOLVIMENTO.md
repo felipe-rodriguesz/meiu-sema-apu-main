@@ -35,7 +35,7 @@ A divisão inicial previa desenvolvimento com José. A implementação e consoli
 
 | Ordem | Entrega | Responsável | Dependência e conclusão |
 | --- | --- | --- | --- |
-| 1 | Regularizar lint da API e cobertura TypeScript do lint do painel; acompanhar alertas moderados e checks do GitHub. | Felipe | Pendências técnicas registradas; corrigir e retestar antes de afirmar verificação integral. |
+| 1 | Manter lint regularizado; acompanhar alertas moderados e checks do GitHub. | Felipe | Lint regularizado; demais ressalvas permanecem registradas em ENTREGA-FASEIV. |
 | 2 | Conferir uso em celular físico e preparar vídeo/demonstração controlada. | Felipe; Benedito e Maria usam evidências | Fluxo reproduzível e limitações registradas. |
 | 3 | Consolidar documentos, horas reais e cronologia. | Benedito e Maria; Felipe fornece evidências | Documentos e vídeos até 19/11; datas de commit não equivalem a horas trabalhadas. |
 | 4 | Apresentar versão e validar definições finais com Leandro. | Felipe | Consultar interesse e viabilidade de piloto antes da entrega. |

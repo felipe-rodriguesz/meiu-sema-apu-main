@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-export function databaseOptions(env: Record<string, any>) {
+export function databaseOptions(env: Record<string, string | undefined>) {
   if (!env.DATABASE_URL) throw new Error('Configure DATABASE_URL.');
   const url = new URL(env.DATABASE_URL);
   if (!['postgres:', 'postgresql:'].includes(url.protocol)) throw new Error('DATABASE_URL deve apontar para PostgreSQL.');
@@ -20,7 +20,7 @@ export function databaseOptions(env: Record<string, any>) {
   };
 }
 
-export function validateEnvironment(env: Record<string, any>) {
+export function validateEnvironment(env: Record<string, string | undefined>) {
   databaseOptions(env);
   if (!env.JWT_SECRET || env.JWT_SECRET.length < 32 || /minha_chave|troque|change.me/i.test(env.JWT_SECRET)) {
     throw new Error('Configure JWT_SECRET com um segredo aleatório de pelo menos 32 caracteres.');

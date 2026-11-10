@@ -4,7 +4,7 @@
 
 O mínimo funcional está implementado e passou nos testes controlados abaixo. Publicação acessível para demonstração/piloto supervisionado. Não equivale a homologação de campo, auditoria independente, garantia de ausência de bugs ou aprovação para operação municipal permanente.
 
-Base conferida: `ac62dbc`, igual à main remota antes desta revisão documental. O Render mostra `6a9c463` como Live; a diferença até ac62dbc é documentação e o script local de restauração (`--no-privileges`), sem mudança na aplicação publicada. A presente revisão altera somente documentação.
+Base conferida: `ac62dbc`, igual à main remota antes desta revisão documental. O Render mostra `6a9c463` como Live; a diferença até ac62dbc é documentação e o script local de restauração (`--no-privileges`), sem mudança na aplicação publicada. A auditoria inicial alterou somente documentação; a regularização posterior do lint está descrita ao final.
 
 ## Escopo implementado
 
@@ -29,8 +29,8 @@ Notícias continuam opcionais: rota pública legada existe, mas não foi criada 
 | Navegador Edge/Chromium | 18 testes aprovados, zero falhas, contra imagem de homologação `meiu-sema-release:20261106` em localhost:8082 e banco separado. |
 | Larguras cobertas pelos testes | 320, 390, 768, 1365 e 1440 px conforme cenário. Fluxo integrado inclui QR, login, recebimento, correção e CSV. |
 | Lint do formulário | Aprovado. |
-| Lint do painel | Comando retorna sucesso, mas a configuração só inclui JS/JSX; TS/TSX ficam sem essa análise. Cobertura incompleta. |
-| Lint da API | Falhou por ausência de configuração ESLint. Build e testes passam, mas esta ferramenta precisa ser regularizada. |
+| Lint do painel | Regularizado após a auditoria: JS/JSX e TS/TSX, incluindo testes; regras TypeScript e React ativas. Zero erros/avisos. |
+| Lint da API | Regularizado após a auditoria: TypeScript, scripts e testes JavaScript analisados. Zero erros/avisos. |
 | Dependências de produção | API: 9 alertas moderados, 0 altos/críticos. Painel e formulário: 0 alertas. |
 | Arquivos versionados | Busca de arquivos privados e padrões de credenciais não encontrou segredos de alta confiança; nenhum `.env` real rastreado ou localizado no histórico consultado. Não substitui scanner especializado de todo o histórico. |
 | Publicação HTTPS | Formulário, painel e pontos públicos: 200; sessão e relatórios sem login: 401; `/.env`, `/.git/config` e `/api/docs`: 404. CSP e HSTS presentes. |
@@ -47,7 +47,7 @@ Referência: [Guia de segurança de Mayk Brito](https://maykbrito.dev/blog/segur
 
 | Tema do guia | Situação e evidência |
 | --- | --- |
-| Revisão e ferramentas (1.1) | Parcial: testes e revisão executados; revisão técnica independente não comprovada, lint da API ausente, TS do painel fora do lint, CI bloqueado. |
+| Revisão e ferramentas (1.1) | Parcial: testes e revisão executados; revisão técnica independente não comprovada, lint regularizado nesta revisão, mas CI continua bloqueado. |
 | Arquivos privados e segredos (1.2–1.3) | Atendido no estado examinado: `.gitignore`, modelos sem segredo operacional e configuração via ambiente; verificações não encontraram credenciais reais rastreadas. |
 | Sessões (1.4, 7.1) | Atendido: cookie protegido, assinatura/expiração HS256 verificadas, operador consultado no banco. Token não vai no JSON ou localStorage. |
 | Autorização (7.2) | Atendido para o perfil atual: proteção global e rotas públicas explícitas; contas cadastradas têm administração de todos os pontos. Não há isolamento por ponto. |
@@ -87,10 +87,18 @@ Para relatório semanal, status e RACI, registrar Felipe na implementação efet
 
 ## Próximos passos
 
-1. Regularizar lint da API e TypeScript do painel; reavaliar alertas e desbloquear CI quando possível. Esta auditoria não alterou código ou dependências.
+1. Lint regularizado; acompanhar os alertas existentes e desbloquear CI quando possível. As demais pendências permanecem sob responsabilidade da equipe.
 2. Validar em celular físico, gravar demonstração com banco fictício e reunir evidências para documentos/vídeos até 19/11/2026.
 3. Consultar Leandro sobre piloto pequeno, sem comprometer entrega e margem para correções. Exigir ponto, operador, balança, internet, condições de recebimento, armazenamento e destinação; preparar conta individual e orientações antes de divulgar.
 4. Se não houver condições, registrar piloto como pendência da próxima fase. Não classificar simulação como atendimento real.
 5. Definir mantenedor e cópia externa protegida. O banco atual expira em **06/12/2026**; resolver continuidade e exportar antes dessa data.
 
 Não foram enviadas mensagens à equipe/SEMA nem alterados arquivos acadêmicos do Drive nesta auditoria.
+
+## Regularização do lint após a auditoria
+
+ESLint/TypeScript configurados para API e painel, com regras recomendadas ativas e falha em caso de avisos. `npm run lint` somente analisa; `npm run lint:fix` aplica correções automáticas explicitamente. A configuração ignora dependências e compilações, sem excluir fontes ou testes. O workflow passa a executar lint nos três projetos antes do build; a restrição de cobrança do GitHub não foi alterada.
+
+Os ajustes substituem tipos `any` por contratos explícitos e separam estados iniciais das respostas assíncronas no cadastro de pontos, pedidos e relatórios. Não mudam as regras de negócio. Não houve atualização das versões das dependências de produção. A revisão foi validada localmente e não foi publicada no Render.
+
+Validação posterior ao ajuste: lint dos três projetos sem erros/avisos, checagem TypeScript do painel e builds aprovados; 18 testes da API e 18 de navegador aprovados. Os testes de navegador usaram a imagem local reconstruída `meiu-sema-lint:20261109`, com banco exclusivo de homologação. Uma entrada TypeScript inválida fornecida via stdin foi rejeitada pelo lint da API e do painel, confirmando a cobertura sem criar arquivos no projeto.

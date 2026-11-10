@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import api from '../../services/api';
 import './Relatorios.css';
@@ -24,27 +24,30 @@ export default function Relatorios() {
   const [dados, setDados] = useState<Relatorio | null>(null);
   const [pontos, setPontos] = useState<{id: string; nome: string}[]>([]);
   const [erro, setErro] = useState('');
-  const [carregando, setCarregando] = useState(false);
+  const [carregando, setCarregando] = useState(true);
   const [exportando, setExportando] = useState(false);
   const [limite, setLimite] = useState(100);
   const request = useRef(0);
   const alterados = Object.keys(inicial).some(k => filtros[k as keyof Filtros] !== aplicados[k as keyof Filtros]);
-  async function carregar(f: Filtros) {
-    if (f.inicio && f.fim && f.inicio > f.fim) { setErro('A data final deve ser igual ou posterior à data inicial.'); return; }
+  const consultar = useCallback((f: Filtros) => {
     const id = ++request.current;
-    setErro(''); setCarregando(true);
-    try {
-      const res = await api.get<Relatorio>('/relatorios', { params: params(f) });
+    return api.get<Relatorio>('/relatorios', { params: params(f) }).then(res => {
       if (id !== request.current) return;
       setDados(res.data); setAplicados({ ...f }); setLimite(100);
-    } catch (e) { if (id === request.current) { setErro(mensagem(e)); setDados(null); } }
-    finally { if (id === request.current) setCarregando(false); }
+    }).catch(e => { if (id === request.current) { setErro(mensagem(e)); setDados(null); } })
+      .finally(() => { if (id === request.current) setCarregando(false); });
+  }, []);
+  function carregar(f: Filtros) {
+    if (f.inicio && f.fim && f.inicio > f.fim) { setErro('A data final deve ser igual ou posterior à data inicial.'); return; }
+    setErro(''); setCarregando(true);
+    return consultar(f);
   }
   useEffect(() => {
-    void carregar(inicial);
+    const controle = request;
+    void consultar(inicial);
     api.get('/pontos-coleta/admin').then(r => setPontos(r.data)).catch(() => setErro('Não foi possível carregar a lista de pontos. Atualize a página.'));
-    return () => { request.current++; };
-  }, []);
+    return () => { controle.current++; };
+  }, [consultar]);
   function campo(key: keyof Filtros, value: string) { setFiltros(f => ({ ...f, [key]: value })); }
   async function exportar() {
     setExportando(true); setErro('');

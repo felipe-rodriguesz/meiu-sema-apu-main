@@ -25,6 +25,7 @@ jobs:
           cache: npm
           cache-dependency-path: ${{ matrix.project }}/package-lock.json
       - run: npm ci --no-audit --no-fund
+      - run: npm run lint -- --max-warnings=0
       - run: npm run build
       - run: npm audit --omit=dev --audit-level=high
 

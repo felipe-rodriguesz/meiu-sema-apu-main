@@ -136,3 +136,9 @@ Use banco exclusivo de demonstração, sem dados reais. Cadastre um ponto fictí
 4. Trabalhe em branch, abra pull request, peça revisão e execute os testes afetados. Confira os limites de validação em ENTREGA-FASEIV.md.
 5. Faça backup antes de atualizar. Publique manualmente no Render e confira saúde, login e consultas; preserve o backup para recuperação.
 6. Antes de uso contínuo, resolva a expiração do banco, indique mantenedor, contas individuais e rotina de backup externo protegido. Não compartilhe uma única conta entre operadores: o histórico usa a identidade autenticada.
+
+## Lint
+
+Em cada aplicação, execute `npm ci` e `npm run lint`. API e painel analisam fontes TypeScript e JavaScript, testes e configurações; o painel também aplica regras de Hooks e React Refresh às telas. Use Node 24. A validação não altera arquivos. Para correções automáticas na API ou no painel, execute `npm run lint:fix` e revise o diff.
+
+O workflow executa lint nos três projetos com `--max-warnings=0`. Isso complementa compilação, checagem TypeScript e testes; não substitui nenhum deles. Enquanto o GitHub Actions estiver bloqueado, essas verificações precisam ser executadas localmente antes da publicação.
