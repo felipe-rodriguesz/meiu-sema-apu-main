@@ -14,7 +14,7 @@ export class Descarte {
   @PrimaryColumn('uuid')
   id: string = randomUUID();
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   criado_em: Date = new Date();
 
   @Column({ unique: true })

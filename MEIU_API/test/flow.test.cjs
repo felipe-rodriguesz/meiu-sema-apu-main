@@ -58,16 +58,17 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
   await new InitialSchema1793232000000().up(initialRunner);
   await initialRunner.release();
   const oldId = randomUUID();
-  await db.query("INSERT INTO descarte (id, protocolo, quantidade_kg, frequencia_dias) VALUES ($1, 'TX-LEGADO', -1, 7)", [oldId]);
+  await db.query("INSERT INTO descarte (id, protocolo, quantidade_kg, frequencia_dias, criado_em) VALUES ($1, 'TX-LEGADO', -1, 7, '2026-10-31 02:59:59')", [oldId]);
 
   await t.test('migração recusa dados inválidos sem apagar registros e preserva legado após correção', async () => {
     await assert.rejects(db.runMigrations({ transaction: 'all' }), /pesos\/frequências inválidos/);
     assert.equal((await db.query('SELECT quantidade_kg FROM descarte WHERE id=$1', [oldId]))[0].quantidade_kg, -1);
     await db.query('UPDATE descarte SET quantidade_kg=5 WHERE id=$1', [oldId]);
-    assert.equal((await db.runMigrations({ transaction: 'all' })).length, 5);
+    assert.equal((await db.runMigrations({ transaction: 'all' })).length, 6);
     assert.equal((await db.runMigrations()).length, 0);
     const [old] = await db.query('SELECT * FROM descarte WHERE id=$1', [oldId]);
     assert.equal(Number(old.quantidade_kg), 5);
+    assert.equal(old.criado_em.toISOString(), '2026-10-31T02:59:59.000Z');
     assert.equal(old.situacao, 'PENDENTE');
     assert.equal(old.peso_recebido_kg, null);
   });
@@ -76,12 +77,13 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
     const url = new URL(process.env.DATABASE_URL); url.pathname = '/' + freshName;
     fresh = new DataSource({ ...source.options, url: url.toString() });
     await fresh.initialize();
-    assert.equal((await fresh.runMigrations()).length, 5);
+    assert.equal((await fresh.runMigrations()).length, 6);
     const columns = async connection => connection.query("SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_name IN ('descarte','ponto_coleta') ORDER BY table_name, ordinal_position");
     assert.deepEqual(await columns(fresh), await columns(db));
     await fresh.undoLastMigration();
+    await fresh.undoLastMigration();
     await fresh.query("INSERT INTO ponto_coleta(nome,tipo,dias_semana,horario_inicio,horario_fim,materiais_aceitos) VALUES ('Legado', 'Ponto Fixo', ARRAY[1,5], '09:00', '17:00', 'Retalhos; algodão limpo')");
-    assert.equal((await fresh.runMigrations()).length, 1);
+    assert.equal((await fresh.runMigrations()).length, 2);
     const [migrated] = await fresh.query('SELECT horarios_semana,materiais_lista FROM ponto_coleta');
     assert.deepEqual(migrated.horarios_semana, [{dia:1,inicio:'09:00',fim:'17:00'},{dia:5,inicio:'09:00',fim:'17:00'}]);
     assert.deepEqual(migrated.materiais_lista, ['Retalhos; algodão limpo']);
@@ -307,8 +309,8 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
     const dbb = (await request('GET', '/descartes/protocolo/' + b.body.protocolo)).body;
     assert.equal((await request('POST', '/descartes/' + da.id + '/recebimento', { peso_recebido_kg: 8.7 })).status, 200);
     assert.equal((await request('PATCH', '/descartes/' + da.id + '/recebimento', { peso_recebido_kg: 8.6, versao: 1, motivo: 'Aferição controlada' })).status, 200);
-    await db.query("UPDATE descarte SET criado_em='2026-10-30 23:59:59', recebido_em='2026-11-01T02:30:00Z' WHERE id=$1", [da.id]);
-    await db.query("UPDATE descarte SET criado_em='2026-10-31 00:00:00' WHERE id=$1", [dbb.id]);
+    await db.query("UPDATE descarte SET criado_em='2026-10-31T02:59:59Z', recebido_em='2026-11-01T02:30:00Z' WHERE id=$1", [da.id]);
+    await db.query("UPDATE descarte SET criado_em='2026-10-31T03:00:00Z' WHERE id=$1", [dbb.id]);
     const filtro = '?ponto_coleta_id=' + p.id;
     const all = (await request('GET', '/relatorios' + filtro)).body;
     assert.deepEqual(all.totais, { registros: 2, pendentes: 1, recebidos: 1, peso_declarado_kg: 12.5, peso_recebido_kg: 8.6 });
@@ -317,6 +319,12 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
     assert.equal(all.registros.length, 2);
     const day = (await request('GET', '/relatorios' + filtro + '&inicio=2026-10-30&fim=2026-10-30')).body;
     assert.equal(day.totais.registros, 1); assert.equal(day.registros[0].protocolo, a.body.protocolo);
+    assert.equal(day.registros[0].criado_em, '2026-10-30 23:59:59');
+    const nextDay = (await request('GET', '/relatorios' + filtro + '&inicio=2026-10-31&fim=2026-10-31')).body;
+    assert.deepEqual(nextDay.registros.map(r => r.protocolo), [b.body.protocolo]);
+    assert.equal(nextDay.registros[0].criado_em, '2026-10-31 00:00:00');
+    const detail = (await request('GET', '/descartes/protocolo/' + a.body.protocolo)).body;
+    assert.equal(detail.criado_em, '2026-10-31T02:59:59.000Z');
     const received = (await request('GET', '/relatorios' + filtro + '&base_data=recebimento&inicio=2026-10-31&fim=2026-10-31&situacao=RECEBIDO&residuo_principal=Retalhos')).body;
     assert.equal(received.totais.registros, 1); assert.equal(received.totais.peso_recebido_kg, 8.6);
     assert.equal(received.registros[0].recebido_em, '2026-10-31 23:30:00');
@@ -352,6 +360,7 @@ test('API com PostgreSQL real: migrações, segurança, recebimento e concorrên
     assert.equal(data.reduce((sum, r) => sum + Math.round(Number(r[5].replace(',', '.')) * 1000), 0) / 1000, all.totais.peso_declarado_kg);
     assert.equal(data.reduce((sum, r) => sum + Math.round(Number(r[6].replace(',', '.')) * 1000), 0) / 1000, all.totais.peso_recebido_kg);
     assert.equal(data[0][3], "'" + p.nome);
+    assert.equal(data.find(r => r[0] === a.body.protocolo)[1], day.registros[0].criado_em);
     assert.equal(data.find(r => r[0] === a.body.protocolo)[10], 'Algodão; "limpo"\nseco');
     assert.equal((await csv(emptyFilter)).length, 1);
     assert.equal((await csv(filtro + '&situacao=PENDENTE'))[1][0], b.body.protocolo);

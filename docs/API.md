@@ -96,4 +96,4 @@ GET /relatorios e GET /relatorios/csv exigem sessão autenticada por cookie. Amb
 
 JSON retorna filtros, totais, por_ponto, por_residuo e registros. Cada total contém registros, pendentes, recebidos, peso_declarado_kg e peso_recebido_kg. Agrupamentos também retornam chave e nome. Soma de pesos usa gramas inteiras antes da conversão final para kg. Não são somados eventos do histórico.
 
-criado_em retorna o calendário gravado (YYYY-MM-DD HH:mm:ss), sem reinterpretar o campo legado sem fuso. recebido_em retorna o calendário America/Sao_Paulo nesse mesmo formato. Período por recebimento exclui pedidos sem recebido_em. O CSV usa UTF-8/BOM, delimitador ;, vírgula decimal e cabeçalho mesmo sem resultados. Tela e CSV usam a mesma consulta filtrada; alterações simultâneas podem mudar os dados entre solicitações.
+criado_em e recebido_em retornam a data e hora em America/Sao_Paulo (YYYY-MM-DD HH:mm:ss). Período por recebimento exclui pedidos sem recebido_em. O CSV usa UTF-8/BOM, delimitador ;, vírgula decimal e cabeçalho mesmo sem resultados. Tela e CSV usam a mesma consulta filtrada; alterações simultâneas podem mudar os dados entre solicitações.

@@ -13,7 +13,7 @@ export function serveWeb(app: NestExpressApplication, directory?: string) {
   }
   const policy = helmet.contentSecurityPolicy({ directives: {
     defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"],
-    imgSrc: ["'self'", 'data:', 'https://*.tile.openstreetmap.org'],
+    imgSrc: ["'self'", 'data:', 'https://tile.openstreetmap.org'],
     connectSrc: ["'self'", 'https://nominatim.openstreetmap.org'],
     fontSrc: ["'self'", 'data:'], objectSrc: ["'none'"], baseUri: ["'self'"],
     formAction: ["'self'"], frameAncestors: ["'none'"],
@@ -23,6 +23,8 @@ export function serveWeb(app: NestExpressApplication, directory?: string) {
     if (req.path.split('/').some(part => part.startsWith('.'))) return res.sendStatus(404);
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
+    // Identify the site to the tile server without sharing paths or protocols.
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     policy(req, res, next);
   });
   app.useStaticAssets(root, { dotfiles: 'deny', index: false, fallthrough: true });

@@ -73,7 +73,7 @@ Os filtros aplicados aparecem acima dos totais. Ao alterar algum campo, aplique 
 
 **Exportar CSV dos filtros aplicados** usa a mesma consulta e inclui todos os registros filtrados, mesmo quando a tabela mostra inicialmente apenas 100. O arquivo usa UTF-8 com BOM, ponto e vírgula, vírgula decimal e três casas nos pesos. Valores de texto que poderiam virar fórmulas em planilhas recebem um apóstrofo de proteção. Sem resultados, o arquivo contém somente o cabeçalho.
 
-O intervalo inclui os dois dias. Datas de recebimento usam America/Sao_Paulo. Datas de registro usam o calendário gravado no campo legado sem fuso; o relatório não reinterpreta dados antigos. Não compare ambientes com convenções diferentes sem conferir esse campo. Filtrar por recebimento exclui registros ainda não recebidos. CSV e tela consultam o banco no momento de cada solicitação; atualize a tela se houver atendimentos simultâneos.
+O intervalo inclui os dois dias. Os filtros de data, a lista de pedidos, o relatório e o CSV usam America/Sao_Paulo. A migração interpreta os registros sem fuso como UTC, a convenção usada no ambiente publicado. Se importar dados de outra origem, confira a convenção antes de migrar. Filtrar por recebimento exclui registros ainda não recebidos. CSV e tela consultam o banco no momento de cada solicitação; atualize a tela se houver atendimentos simultâneos.
 
 ## Backup e restauração
 

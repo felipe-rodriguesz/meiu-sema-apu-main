@@ -64,7 +64,7 @@ export default function Relatorios() {
     <p>Acompanhe os pedidos, os recebimentos e os pesos. Filtre os resultados e exporte para o Excel.</p></div></header>
     <h3 className="painel-subtitulo">Filtrar relatório</h3>
     <form className="relatorio-filtros" onSubmit={e => { e.preventDefault(); void carregar(filtros); }}>
-      <label>Período por<select value={filtros.base_data} onChange={e => campo('base_data', e.target.value)}><option value="registro">Data do registro</option><option value="recebimento">Data do recebimento</option></select></label>
+      <label>Período por<select value={filtros.base_data} onChange={e => campo('base_data', e.target.value)}><option value="registro">Data do registro (São Paulo)</option><option value="recebimento">Data do recebimento (São Paulo)</option></select></label>
       <label>De<input type="date" value={filtros.inicio} onChange={e => campo('inicio', e.target.value)} /></label>
       <label>Até<input type="date" value={filtros.fim} onChange={e => campo('fim', e.target.value)} /></label>
       <label>Ponto de coleta<select value={filtros.ponto_coleta_id} onChange={e => campo('ponto_coleta_id', e.target.value)}><option value="">Todos</option>{pontos.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}</select></label>
@@ -80,7 +80,7 @@ export default function Relatorios() {
     {erro && <p role="alert">{erro}</p>}
     {dados && <div aria-busy={carregando}>
       <div className="relatorio-aplicados" aria-label="Filtros aplicados"><strong>Resultados exibidos</strong>
-        <span>{aplicados.base_data === 'registro' ? 'Data do registro' : 'Data do recebimento (São Paulo)'}: {aplicados.inicio ? data(aplicados.inicio) : 'sem início'} a {aplicados.fim ? data(aplicados.fim) : 'sem fim'}</span>
+        <span>{aplicados.base_data === 'registro' ? 'Data do registro (São Paulo)' : 'Data do recebimento (São Paulo)'}: {aplicados.inicio ? data(aplicados.inicio) : 'sem início'} a {aplicados.fim ? data(aplicados.fim) : 'sem fim'}</span>
         <span>{aplicados.ponto_coleta_id ? pontos.find(p => String(p.id) === aplicados.ponto_coleta_id)?.nome || 'Ponto selecionado' : 'Todos os pontos'}</span>
         <span>{aplicados.residuo_principal || 'Todos os resíduos'}</span><span>{aplicados.situacao || 'Todas as situações'}</span>
       </div>
@@ -95,7 +95,7 @@ export default function Relatorios() {
       <Agrupamento titulo="Por tipo de resíduo" grupos={dados.por_residuo} />
       </div>
       <h3>Registros filtrados ({dados.registros.length})</h3>
-      <p className="painel-rolagem">Deslize a tabela para ver todas as informações.</p><div className="relatorio-tabela" tabIndex={0} role="region" aria-label="Registros filtrados"><table><thead><tr><th>Protocolo</th><th>Registro</th><th>Ponto</th><th>Resíduo</th><th>Situação</th><th>Declarado (kg)</th><th>Recebido (kg)</th><th>Recebimento (São Paulo)</th></tr></thead>
+      <p className="painel-rolagem">Deslize a tabela para ver todas as informações.</p><div className="relatorio-tabela" tabIndex={0} role="region" aria-label="Registros filtrados"><table><thead><tr><th>Protocolo</th><th>Registro (São Paulo)</th><th>Ponto</th><th>Resíduo</th><th>Situação</th><th>Declarado (kg)</th><th>Recebido (kg)</th><th>Recebimento (São Paulo)</th></tr></thead>
         <tbody>{dados.registros.slice(0,limite).map(r => <tr key={r.id}><td>{r.protocolo}</td><td>{data(r.criado_em)}</td><td>{r.ponto_nome || 'Sem ponto'}</td><td>{r.residuo_principal || 'Não informado'}</td><td><span className={'painel-status ' + (r.situacao === 'PENDENTE' ? 'painel-status--pendente' : r.situacao === 'RECEBIDO' ? 'painel-status--recebido' : '')}>{r.situacao}</span></td><td>{kg(r.quantidade_kg)}</td><td>{kg(r.peso_recebido_kg)}</td><td>{data(r.recebido_em || '')}</td></tr>)}</tbody></table></div>
       {!dados.registros.length && <p>Nenhum registro encontrado para os filtros.</p>}
       {dados.registros.length > limite && <button type="button" onClick={() => setLimite(l => l + 100)}>Mostrar mais registros ({limite} de {dados.registros.length})</button>}

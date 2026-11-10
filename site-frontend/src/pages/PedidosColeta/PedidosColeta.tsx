@@ -15,7 +15,7 @@ interface Pedido {
   frequencia_dias: number; eh_mistura: boolean; ponto_coleta?: Ponto; historico?: Evento[];
 }
 const kg = (value: number | null) => value == null ? '—' : new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 }).format(value) + ' kg';
-const date = (value?: string | null) => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : '—';
+const date = (value?: string | null) => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(value)) : '—';
 function message(error: unknown): string {
   if (axios.isAxiosError(error)) {
     if (error.response?.status === 401) return 'Sua sessão expirou. Entre novamente.';

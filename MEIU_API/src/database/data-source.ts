@@ -8,8 +8,10 @@ import { Receipts1793232002000 } from './migrations/1793232002000-receipts';
 import { PointOperation1793232003000 } from './migrations/1793232003000-point-operation';
 import { WeeklySchedule1793232004000 } from './migrations/1793232004000-weekly-schedule';
 
+import { DiscardCreatedAtUtc1793232005000 } from './migrations/1793232005000-discard-created-at-utc';
+
 export default new DataSource({
   ...databaseOptions(process.env),
-  migrations: [InitialSchema1793232000000, Weights1793232001000, Receipts1793232002000, PointOperation1793232003000, WeeklySchedule1793232004000],
+  migrations: [InitialSchema1793232000000, Weights1793232001000, Receipts1793232002000, PointOperation1793232003000, WeeklySchedule1793232004000, DiscardCreatedAtUtc1793232005000],
   migrationsTableName: 'meiu_migrations',
 });

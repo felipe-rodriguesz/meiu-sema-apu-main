@@ -36,11 +36,8 @@ export class RelatoriosService {
     const params: unknown[] = [];
     const clauses: string[] = [];
     const bind = (v: unknown) => { params.push(v); return '$' + params.length; };
-    // Datas legadas de criação não têm fuso. Comparar o calendário gravado,
-    // sem reinterpretá-lo; recebimentos têm fuso e usam o calendário de São Paulo.
-    const data = f.base_data === 'recebimento'
-      ? "(d.recebido_em AT TIME ZONE 'America/Sao_Paulo')::date"
-      : 'd.criado_em::date';
+    const dataBase = f.base_data === 'recebimento' ? 'd.recebido_em' : 'd.criado_em';
+    const data = `(${dataBase} AT TIME ZONE 'America/Sao_Paulo')::date`;
     if (f.base_data === 'recebimento') clauses.push('d.recebido_em IS NOT NULL');
     if (f.inicio) clauses.push(data + ' >= ' + bind(f.inicio) + '::date');
     if (f.fim) clauses.push(data + ' <= ' + bind(f.fim) + '::date');
@@ -48,7 +45,7 @@ export class RelatoriosService {
     if (f.residuo_principal) clauses.push('d.residuo_principal = ' + bind(f.residuo_principal));
     if (f.situacao) clauses.push('d.situacao = ' + bind(f.situacao));
     const rows = await this.dataSource.query<RegistroBanco[]>(`
-      SELECT d.id, d.protocolo, to_char(d.criado_em, 'YYYY-MM-DD HH24:MI:SS') AS criado_em,
+      SELECT d.id, d.protocolo, to_char(d.criado_em AT TIME ZONE 'America/Sao_Paulo', 'YYYY-MM-DD HH24:MI:SS') AS criado_em,
         d.situacao, d.ponto_coleta_id, p.nome AS ponto_nome, d.residuo_principal,
         d.quantidade_kg, d.peso_recebido_kg, d.frequencia_dias,
         d.eh_mistura, d.material, d.estado_material, d.tipo_tecido,
@@ -91,7 +88,7 @@ export class RelatoriosService {
       return '"' + s.replace(/"/g, '""') + '"';
     };
     const peso = (v: number | null) => v == null ? '' : v.toFixed(3).replace('.', ',');
-    const header = ['Protocolo', 'Registro (calendário gravado)', 'Situação', 'Ponto de coleta', 'Tipo de resíduo', 'Peso declarado (kg)', 'Peso recebido (kg)', 'Recebimento (São Paulo)', 'Frequência (dias)', 'Mistura', 'Composição', 'Estado', 'Tecido/aplicação'];
+    const header = ['Protocolo', 'Registro (São Paulo)', 'Situação', 'Ponto de coleta', 'Tipo de resíduo', 'Peso declarado (kg)', 'Peso recebido (kg)', 'Recebimento (São Paulo)', 'Frequência (dias)', 'Mistura', 'Composição', 'Estado', 'Tecido/aplicação'];
     const rows = relatorio.registros.map(r => [
       r.protocolo, r.criado_em, r.situacao, r.ponto_nome, r.residuo_principal,
       peso(r.quantidade_kg), peso(r.peso_recebido_kg), r.recebido_em, r.frequencia_dias,
