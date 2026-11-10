@@ -2,7 +2,7 @@
 
 NestJS, TypeORM e PostgreSQL. Prefixo: /api/v1.
 
-Consulte [execução e manutenção](../docs/OPERACAO.md), [contrato de integração](../docs/INTEGRACAO-FASEIV.md) e [plano da fase](../DESENVOLVIMENTO.md).
+Consulte [execução e manutenção](../docs/OPERACAO.md), [contrato de integração](../docs/API.md) e [plano da fase](../DESENVOLVIMENTO.md).
 
 ## Comandos
 
@@ -17,4 +17,4 @@ Consulte [execução e manutenção](../docs/OPERACAO.md), [contrato de integra�
 
 Copie .env.example para .env e configure as variáveis antes de executar a API. JWT_SECRET e CORS_ORIGINS são obrigatórios. O banco remoto deve usar TLS com validação de certificado. A estrutura é atualizada por migrações; synchronize permanece desabilitado.
 
-Swagger: /api/docs, somente em desenvolvimento. Consultas e operações administrativas exigem JWT; apenas rotas explicitamente públicas dispensam login.
+Swagger: /api/docs, somente em desenvolvimento. Consultas e operações administrativas exigem sessão JWT por cookie HttpOnly; apenas rotas explicitamente públicas dispensam login.

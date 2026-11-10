@@ -94,7 +94,7 @@ Antes de uso real, o mantenedor deve definir frequência, retenção e armazenam
 
 O acesso administrativo usa cookie de sessão HttpOnly, Secure em produção e SameSite=Strict; o token não deve ser copiado para armazenamento do navegador ou incluído em links. Configure CORS_ORIGINS somente com as origens reais do painel. As alterações autenticadas exigem essa origem. Login e cadastro público são limitados por IP em janelas de 15 minutos (15 e 30 solicitações, respectivamente); respostas 429 incluem Retry-After. Os contadores ficam na memória da API e atendem à implantação atual com uma instância. Caso a API passe a ter várias instâncias, use um armazenamento compartilhado para manter o mesmo limite entre elas.
 
-Na configuração Compose, TRUST_PROXY_HOPS=2 corresponde a Caddy e Nginx na frente da API. Ao mudar a topologia, ajuste esse número de acordo com os proxies confiáveis; não habilite confiança irrestrita em cabeçalhos enviados pelo cliente. O servidor web envia política de conteúdo e demais cabeçalhos de segurança; confira-os no domínio publicado. A rotina automática em `.github/workflows/security.yml` verifica dependências de produção em cada projeto e bloqueia avisos altos ou críticos quando as alterações forem enviadas ao repositório.
+Na configuração Compose, TRUST_PROXY_HOPS=2 corresponde a Caddy e Nginx na frente da API. Ao mudar a topologia, ajuste esse número de acordo com os proxies confiáveis; não habilite confiança irrestrita em cabeçalhos enviados pelo cliente. O servidor web envia política de conteúdo e demais cabeçalhos de segurança; confira-os no domínio publicado. O workflow `.github/workflows/security.yml` está configurado para verificar dependências e bloquear avisos altos/críticos, mas sua execução foi bloqueada pelo limite de cobrança da conta GitHub. Até regularizá-lo, execute as verificações localmente e publique manualmente; veja RENDER.md.
 
 A configuração está preparada para um servidor Docker com domínio próprio:
 
@@ -104,7 +104,7 @@ A configuração está preparada para um servidor Docker com domínio próprio:
 4. Execute `docker compose --profile https up -d --build`.
 5. Confira certificado, login, formulário no celular, persistência e backup.
 
-Caddy obtém o certificado para um domínio público válido. Os volumes de certificados precisam ser preservados. HTTPS público não foi provisionado nesta entrega: falta definir servidor/domínio e responsável pela manutenção.
+Caddy obtém o certificado para um domínio público válido. Os volumes de certificados precisam ser preservados. A implantação atual já usa HTTPS gerenciado pelo Render; os passos acima são uma alternativa para futura hospedagem própria. Felipe coordena o ambiente nesta entrega; o mantenedor institucional ainda precisa ser definido.
 
 O banco do Compose fica na rede interna. Para PostgreSQL remoto, configure a API/migrador com DATABASE_URL remoto e DATABASE_SSL=true; use DATABASE_CA_FILE quando houver uma CA própria. A validação do certificado permanece habilitada.
 
@@ -112,7 +112,7 @@ O banco do Compose fica na rede interna. Para PostgreSQL remoto, configure a API
 
 Utilize ambientes e bancos diferentes para demonstração e operação real. Não divulgue uma instalação que contenha pontos fictícios como pontos reais.
 
-Formulário sem localização, configuração operacional dos pontos, QR Code e relatórios/CSV estão consolidados na versão da equipe. Veja [Implementação](IMPLEMENTACAO-LOCAL-JOSE.md) e [publicação no Render](RENDER.md). Notícias e melhorias adicionais não foram implementadas.
+Formulário sem localização, configuração operacional dos pontos, QR Code e relatórios/CSV estão consolidados na versão da equipe. Veja [verificação da entrega](ENTREGA-FASEIV.md) e [publicação no Render](RENDER.md). A interface de notícias não integra esta entrega; a rota pública legada de consulta foi preservada.
 
 A ativação pública depende também de conferir a infraestrutura escolhida, monitoramento, política de acessos e proteção contra abuso das rotas públicas/login. Os testes controlados desta entrega não são um piloto com a SEMA.
 
@@ -123,3 +123,16 @@ API: crie uma conta PostgreSQL local exclusiva com CREATEDB e um banco com prefi
 Painel: `npm run typecheck`, `npm run build`. Para testes de navegador, suba a instância local, crie um operador fictício, configure E2E_EMAIL e E2E_PASSWORD e execute `npm run test:e2e`. Por padrão usa Edge e http://localhost:8080/admin/. E2E_BROWSER, E2E_BASE_URL e E2E_API_URL permitem ajustar navegador/endereço; os testes aceitam apenas localhost. Em Linux/CI, instale Chromium com `npx playwright install chromium` e use E2E_BROWSER=chromium.
 
 Formulário: `npm run build` em mobile-frontend. Os testes E2E criam pontos/pedidos fictícios, sem limpar automaticamente os dados do ambiente.
+
+## Demonstração reproduzível
+
+Use banco exclusivo de demonstração, sem dados reais. Cadastre um ponto fictício com limite de pelo menos 10 kg, horários e materiais. Registre 10 kg no formulário, guarde o QR/protocolo, entre no painel e confirme 8,7 kg. Confira 1 registro, 1 recebimento, 0 pendentes, 10 kg declarados e 8,7 kg recebidos no relatório e CSV. Uma correção para 8,6 kg deve exigir motivo e manter 1 recebimento. Filtrar pendentes deve retornar zero e CSV somente com cabeçalho.
+
+## Continuidade por outra equipe
+
+1. Solicite acesso ao GitHub e ao ambiente ao mantenedor; credenciais são entregues por canal privado, nunca em documentos ou vídeos.
+2. Clone o repositório, use Node 24/PostgreSQL 16 ou Docker e reproduza o fluxo acima.
+3. Leia API.md antes de alterar integrações. Use nova migração para mudanças no banco; não edite migrações já aplicadas.
+4. Trabalhe em branch, abra pull request, peça revisão e execute os testes afetados. Confira os limites de validação em ENTREGA-FASEIV.md.
+5. Faça backup antes de atualizar. Publique manualmente no Render e confira saúde, login e consultas; preserve o backup para recuperação.
+6. Antes de uso contínuo, resolva a expiração do banco, indique mantenedor, contas individuais e rotina de backup externo protegido. Não compartilhe uma única conta entre operadores: o histórico usa a identidade autenticada.

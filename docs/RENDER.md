@@ -42,3 +42,9 @@ O workflow do GitHub está configurado para compilar as três aplicações, exec
 Em 06/11/2026, a auditoria da API identificou nove avisos moderados e nenhum alto/crítico. Os avisos envolvem NestJS/SSE, inspeção de arquivos (`file-type`) e padrões de arquivos (`glob`/`minimatch`). A aplicação atual não expõe SSE nem upload/inspeção de arquivos e utiliza classes de entidades/migrações definidas no código, sem padrões fornecidos por usuários. Isso reduz a exposição dos caminhos afetados, mas não elimina os avisos. Uma atualização principal deve ser validada antes de introduzir esses recursos. Não usar `npm audit fix --force` diretamente no ambiente publicado.
 
 Reinícios não apagam o PostgreSQL, mas reiniciam os contadores de limite de requisições. A configuração atual contempla uma instância da API; múltiplas instâncias exigem limites compartilhados.
+
+## Estado confirmado em 09/11/2026
+
+Serviço Live em `6a9c463`, banco disponível e acesso externo bloqueado. Expiração exibida: **06/12/2026**. A main `ac62dbc` acrescentava somente documentação e ajuste do script local de restauração; não exigia recompilar a aplicação. A revisão documental de 09/11 também não altera a aplicação publicada.
+
+A conexão interna usa `DATABASE_SSL=false` no Blueprint; não confundir rede privada com TLS. Manutenção externa exige verificação de certificado. O plano atual não é hospedagem permanente. A configuração de cobrança adicional/alertas personalizados ainda precisa de confirmação; recursos Free não demonstram por si só um teto de gastos da conta.

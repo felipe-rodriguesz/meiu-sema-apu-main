@@ -1,4 +1,6 @@
-# Integração da frente de Felipe com José
+# Arquitetura e contratos da API
+
+Arquitetura: formulário e painel React → API NestJS → PostgreSQL. A API é a única camada de acesso ao banco. No Render, as duas interfaces e a API compartilham a mesma origem; no Compose, Nginx encaminha as chamadas à API. Os módulos estão em `MEIU_API/src/modules`, as regras de ambiente/sessão em `src/config` e as migrações em `src/database/migrations`.
 
 Base: /api/v1. Valores numéricos são números JSON; kg aceitam até três casas decimais. Erros de validação retornam 400 com message. O frontend deve exibir a mensagem e manter o formulário preenchido.
 
@@ -50,9 +52,9 @@ O formulário gera o QR com o endereço público do painel e o protocolo codific
 
 http://localhost:8080/admin/?protocolo=TX-EXEMPLO
 
-O painel preserva o protocolo ao pedir login, abre o pedido após autenticar e permite busca manual. O QR contém apenas o endereço/protocolo; não deve carregar tokens, senhas ou dados do material. O domínio real será definido na hospedagem.
+O painel preserva o protocolo ao pedir login, abre o pedido após autenticar e permite busca manual. O QR contém apenas o endereço/protocolo; não deve carregar tokens, senhas ou dados do material. Em produção, o painel está em https://meiu-sema-apucarana.onrender.com/admin/.
 
-## Base dos relatórios de José
+## Regras dos relatórios
 
 - Registros: pedidos cadastrados. Não equivalem a pessoas únicas.
 - Pendências: situacao = 'PENDENTE'.
@@ -65,7 +67,7 @@ O painel preserva o protocolo ao pedir login, abre o pedido após autenticar e p
 - Manter zero/vazio coerentes e somas precisas em gramas inteiras no relatório. Exportar o mesmo conjunto filtrado da tela.
 - Como a proteção é global, novas rotas administrativas permanecem protegidas. Marcar Public somente o que for realmente público.
 
-A migração local 1793232003000 adiciona condições de atendimento sem alterar as três anteriores. Não editar migrações que já tenham sido aplicadas em um ambiente compartilhado. A reversão é recusada quando removeria condições cadastradas.
+A migração 1793232003000 adiciona condições de atendimento sem alterar as três anteriores. Não editar migrações que já tenham sido aplicadas em um ambiente compartilhado. A reversão é recusada quando removeria condições cadastradas.
 
 ## Condições dos pontos
 
@@ -84,7 +86,7 @@ A migração 1793232004000 copia o horário geral antigo para cada dia já selec
 
 ## Consulta de relatórios
 
-GET /relatorios e GET /relatorios/csv exigem token. Ambos aceitam os mesmos filtros opcionais:
+GET /relatorios e GET /relatorios/csv exigem sessão autenticada por cookie. Ambos aceitam os mesmos filtros opcionais:
 
 - inicio / fim: YYYY-MM-DD, intervalo inclusivo e ordenado.
 - base_data: registro (padrão) ou recebimento.

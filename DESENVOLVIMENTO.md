@@ -1,83 +1,46 @@
-# Plano de desenvolvimento — Fase IV
+# Fase IV — escopo e conclusão
 
-Objetivo: entregar um sistema funcional e preparado para um piloto em pontos de coleta supervisionados que a SEMA cadastrar, com relatórios confiáveis, instruções de operação e testes internos concluídos.
+Objetivo: disponibilizar uma versão funcional para piloto supervisionado pela SEMA. A entrega de documentos e vídeos permanece prevista para **19/11/2026**, conforme cronograma registrado do projeto. Piloto real é opcional e depende das condições operacionais e de tempo para corrigir eventuais falhas.
 
-O desenvolvimento seguirá por etapas, conforme a disponibilidade de Felipe e José, sem datas intermediárias fixas. A referência final permanece **19/11/2026 para documentos e vídeos**. O teste com usuários reais será uma oportunidade adicional, condicionada à disponibilidade da SEMA e ao tempo para executar, corrigir e retestar.
+## Entrega mínima e estado atual
 
-## 1. Prioridades da Fase IV
-
-**Estado técnico:** Felipe consolidou também formulário/localização, configuração dos pontos, QR Code e relatórios/CSV. Não há implementação de José pendente de integração. A divisão abaixo permanece como referência do planejamento; a versão consolidada passa a ser a base de entrega. As estatísticas antigas somam pesos declarados; os relatórios de recebimento usam os pesos aferidos. A hospedagem escolhida é o Render gratuito, com limites descritos em [Publicação no Render](docs/RENDER.md).
-
-| Ordem | Prioridade | Resultado esperado |
+| Prioridade | Resultado | Situação em 09/11/2026 |
 | --- | --- | --- |
-| 1 | Corrigir segurança, validações e falhas do fluxo existente. | Acesso administrativo protegido; pesos decimais aceitos; localização sem valores fictícios; mensagens e campos compreensíveis. |
-| 2 | Implementar recebimento e pesagem no banco, API e painel. | Operador encontra o protocolo, registra peso aferido e confirma a entrega sem duplicação. |
-| 3 | Implementar relatórios, filtros e exportação CSV. | Registros, pendências e recebimentos consultáveis, com pesos declarados e recebidos separados. |
-| 4 | Completar a configuração dos pontos e o protocolo/QR Code. Trabalhar em paralelo às prioridades 2 e 3. | A SEMA consegue preparar um novo ponto no painel, sem alterar código; o gerador recebe as orientações de entrega. |
-| 5 | Disponibilizar o ambiente, testar o fluxo completo e corrigir falhas. | Versão acessível, estável nos cenários testados e pronta para uma demonstração controlada. |
-| 6 | Preparar a entrega e apresentar a versão a Leandro. Avaliar um piloto real se houver condições. | Instruções, evidências e acessos organizados; SEMA informada sobre como iniciar o uso. |
-| 7 | **Notícias — opcional e última prioridade.** | Implementar somente após o mínimo técnico, os testes e as correções, com conteúdo definido e sem prejudicar a entrega ou um piloto viável. |
+| 1 | Autenticação, validações, decimais, migrações e proteção de dados administrativos. | Implementado; ressalvas de segurança e ferramentas em ENTREGA-FASEIV. |
+| 2 | Recebimento por protocolo/QR, pesagem separada e correções auditadas, sem duplicação. | Implementado e testado. |
+| 3 | Relatórios e CSV por período, ponto, tipo e situação. | Implementado e testado. |
+| 4 | Pontos editáveis, horários por dia, materiais, limite e orientações; formulário com localização opcional. | Implementado e testado. |
+| 5 | Publicação HTTPS, persistência, conta administrativa e backup recuperável. | Publicado; restauração validada em 08/11. Hospedagem temporária. |
+| 6 | Transferência de conhecimento, documentos/vídeos e avaliação do piloto. | Instruções disponíveis; entrega acadêmica e validação operacional pendentes. |
+| 7 | Notícias, opcionais e por último. | Não implementada nova interface; rota legada preservada. Só retomar após mínimo, testes e correções. |
 
-## 2. Entrega mínima recomendada
+## Regras de funcionamento
 
-### Regras definidas para implementação
+- Registro automático, sem aprovação prévia. Protocolo comprova registro, e aceitação ocorre na conferência presencial.
+- Nome, CPF e CNPJ não são solicitados. Localização do aparelho apenas ordena pontos; não representa origem comprovada do resíduo.
+- Ponto ativo aceita registro antecipado. Horários orientam a entrega; não são agendamento. Materiais são conferidos pelo operador. Limite em kg é por pedido, não por pessoa ou dia.
+- Peso declarado permanece separado do aferido. Data e operador são definidos no servidor. Correção exige motivo e preserva histórico.
+- Pendências não entram no peso recebido; eventos de correção não são novas entregas. Registros anônimos não são geradores únicos.
+- Relatórios usam explicitamente data de registro ou recebimento; CSV aplica os mesmos filtros. Não há comprovação automática da destinação posterior.
 
-- **Registro automático, sem aprovação prévia:** o gerador preenche o formulário, escolhe um ponto ativo e recebe o protocolo/QR Code. Nome, CPF e CNPJ não são obrigatórios. O protocolo comprova o registro; a aceitação do material ocorre na conferência presencial.
-- **Pontos configuráveis:** permitir cadastrar e atualizar endereço, dias da semana com horários próprios, lista de materiais aceitos (incluindo opções próprias do ponto), limites e orientações, além de ativar/desativar. Reutilizar o cadastro existente e manter preenchimento manual de endereço/bairro. O funcionamento deve atender novos pontos supervisionados sem mudanças no código.
-- **Recebimento autenticado:** localizar o pedido por QR Code ou busca manual, conferir o material, registrar peso aferido, data e operador e alterar `PENDENTE` para `RECEBIDO`. Preservar o peso declarado e impedir confirmação duplicada. Eventuais correções devem ser rastreáveis.
-- **Relatórios e CSV:** mostrar registros, recebimentos, pendências, kg declarados e kg recebidos; agrupar por ponto e tipo de resíduo. Filtrar por período, ponto, resíduo e situação, identificando a data usada no filtro. Exportar exatamente os resultados filtrados.
-- **Dados coerentes:** aceitar peso fracionado; rejeitar frequência inválida com mensagem clara; manter localização não informada quando não obtida ou confirmada. Não usar a posição do aparelho ou o bairro do ponto como origem comprovada do resíduo. Registros anônimos não equivalem a pessoas únicas.
-- **Ambiente de uso:** disponibilizar link HTTPS acessível pelo celular, API e banco persistentes, conta administrativa do operador e cópia de segurança. Definir quem mantém o ambiente e os acessos. Separar dados fictícios dos reais.
-- **Material de entrega:** código organizado, instruções para configurar ponto e operar o atendimento, demonstração com dados fictícios, resultados dos testes e limitações conhecidas. Benedito e Maria recebem as evidências para os documentos e vídeos.
+## Critérios de validação
 
-### Fluxo que deve funcionar
+Fluxo: configurar ponto → registrar resíduo → guardar protocolo/QR → autenticar operador → conferir e pesar → confirmar recebimento → consultar/exportar relatório.
 
-1. A SEMA cadastra/configura um ponto e suas condições de funcionamento.
-2. O gerador preenche o formulário, seleciona o ponto ativo e guarda o protocolo/QR Code.
-3. O operador autenticado localiza o pedido, confere o material e informa o peso aferido.
-4. O sistema confirma o recebimento, preserva a declaração inicial e impede duplicação.
-5. A SEMA consulta os resultados e exporta o CSV, com o recebimento contabilizado corretamente.
+Os testes controlados conferem decimais (2,5 kg), localização ausente, ponto inativo, exclusão vinculada, 10 kg declarados/8,7 kg recebidos, confirmação concorrente, correções, CSV e telas de desktop/celular emulado. Resultados e limites estão em [ENTREGA-FASEIV](docs/ENTREGA-FASEIV.md). Não declarar ausência absoluta de bugs nem validação em campo.
 
-Esse fluxo será testado primeiro com pontos e dados fictícios. Quando houver uso real, a SEMA também deverá organizar o atendimento, a balança, o armazenamento e o destino dos materiais. A confirmação no sistema comprova recebimento; a destinação posterior exige evidência própria.
+## Responsabilidades e próximos passos
 
-### Critérios para concluir a entrega técnica
+A divisão inicial previa desenvolvimento com José. A implementação e consolidação da Fase IV foram realizadas por Felipe, que assumiu também as frentes previstas para José. Benedito e Maria cuidam dos documentos e relatórios acadêmicos. Essa atribuição refere-se à Fase IV; preserva-se a autoria do sistema anterior.
 
-- [x] Consultas e ações administrativas exigem autenticação; formulário público e informações públicas dos pontos continuam acessíveis.
-- [x] Um registro de **2,5 kg** é salvo corretamente; entradas inválidas recebem mensagens claras; pontos inativos não aceitam novos pedidos. A tentativa de excluir ponto vinculado é tratada sem erro interno, preservando a desativação e os registros.
-- [x] Na implementação local, geolocalização negada/ausente não gera coordenadas fictícias nem impede indevidamente o fluxo.
-- [x] Em teste controlado, **10 kg declarados e 8,7 kg recebidos** permanecem separados. Repetir a confirmação mantém uma única entrega de 8,7 kg; pendências não entram como peso recebido.
-- [x] Na implementação local, tela e CSV coincidem para os mesmos filtros, inclusive quando não há resultados; a referência de período está clara.
-- [x] Na implementação local, é possível cadastrar/configurar outro ponto fictício e completar o fluxo nas larguras de desktop e celular no navegador, usando QR Code e busca manual, sem alterar o código. Teste em aparelho físico permanece pendente.
-- [ ] O ambiente está acessível, os dados persistem, a cópia de segurança foi conferida e existem instruções de operação e manutenção.
-- [ ] Não há falhas abertas que exponham dados administrativos, impeçam registro/recebimento ou produzam totais incorretos. As correções foram retestadas e as evidências estão organizadas.
+| Ordem | Entrega | Responsável | Dependência e conclusão |
+| --- | --- | --- | --- |
+| 1 | Regularizar lint da API e cobertura TypeScript do lint do painel; acompanhar alertas moderados e checks do GitHub. | Felipe | Pendências técnicas registradas; corrigir e retestar antes de afirmar verificação integral. |
+| 2 | Conferir uso em celular físico e preparar vídeo/demonstração controlada. | Felipe; Benedito e Maria usam evidências | Fluxo reproduzível e limitações registradas. |
+| 3 | Consolidar documentos, horas reais e cronologia. | Benedito e Maria; Felipe fornece evidências | Documentos e vídeos até 19/11; datas de commit não equivalem a horas trabalhadas. |
+| 4 | Apresentar versão e validar definições finais com Leandro. | Felipe | Consultar interesse e viabilidade de piloto antes da entrega. |
+| 5 | Piloto real, se viável. | SEMA organiza; Felipe acompanha | Ponto, operador, balança, materiais, armazenamento/destino e divulgação definidos; reservar tempo para correções. |
+| 6 | Conferir e entregar Fase IV. | Felipe, Benedito e Maria | Código/instruções acessíveis, evidências, documentos e vídeos; distinguir testes controlados de uso real. |
+| 7 | Garantir continuidade do ambiente. | Felipe e mantenedor a definir pela SEMA | Backup externo protegido e solução para o banco antes de 06/12/2026. |
 
-**Atendimento real e aceite operacional de Leandro não bloqueiam a conclusão técnica.** Sem piloto, apresentar o resultado como **“sistema preparado para piloto e validado em testes controlados”**, com validação de campo pendente. Testes internos não garantem ausência de problemas em condições reais.
-
-## 3. Plano de desenvolvimento e entregas
-
-**Divisão de trabalho:** Felipe lidera segurança, banco/API de pedidos, recebimento, ambiente e contato com Leandro. José lidera formulário, configuração dos pontos, QR Code e relatórios, incluindo consulta/exportação na API. Ambos revisam e testam as entregas do outro. Benedito e Maria continuam responsáveis pelos documentos e relatórios acadêmicos. A distribuição por módulo pode ser ajustada entre Felipe e José conforme a disponibilidade.
-
-**Organização:** definir os campos da API antes de dividir as implementações; Felipe coordena as alterações de banco. Usar uma branch por tarefa, revisão pelo colega e registrar atividades, horas efetivas, evidências e links para Benedito e Maria. Avançar o mais rápido que a disponibilidade permitir, preservando tempo para testes, correções e preparação da entrega.
-
-| Etapa | Atividade ou entrega | Responsável principal e colaboração | Dependências | Critério de conclusão |
-| --- | --- | --- | --- | --- |
-| 1 | Organizar tarefas, campos da API e ambiente de desenvolvimento. | **Felipe**, com José. | Disponibilidade e acesso de ambos. | Tarefas divididas, dados e integrações definidos, ambiente local utilizável. |
-| 2 | Corrigir segurança, decimais e validações da API/banco. | **Felipe**; José confere integração. | 1. | Consultas protegidas, decimais persistidos e erros tratados; alteração de banco reproduzível. |
-| 3 | Ajustar formulário, configuração dos pontos e QR Code. | **José**; Felipe apoia integração. | 1; integração com 2. | Campos e orientações utilizáveis, localização correta e protocolo/QR disponíveis. |
-| 4 | Implementar recebimento no banco, API e painel. | **Felipe**; José revisa. | 1 e 2. | Peso aferido, data, operador e situação registrados, sem duplicação. |
-| 5 | Implementar relatórios, filtros e CSV. | **José**; Felipe fornece dados de teste. | Campos da 1; integração final com 4. | Indicadores e exportação protegidos, coerentes e equivalentes. |
-| 6 | Preparar hospedagem, banco, acessos e cópia de segurança. | **Felipe**; José testa pelo celular. | 1 e recursos do ambiente. | Link HTTPS funcional, dados persistentes e manutenção definida. |
-| 7 | Executar testes internos do fluxo completo e dos casos de erro. | **Felipe**; José faz revisão cruzada. | 2 a 6. | Critérios da seção 2 verificados; falhas e evidências registradas. |
-| 8 | Corrigir falhas e repetir os testes afetados. | **José** organiza; Felipe corrige sua frente. | 7. | Falhas impeditivas resolvidas e resultados conferidos novamente. |
-| 9 | Preparar demonstração, instruções e evidências da versão estável. | **José**; Felipe revisa; Benedito/Maria consolidam documentos e vídeos. | 7 e 8; documentação acompanhando o desenvolvimento. | Versão identificada por commit, demonstração controlada e material de uso prontos. |
-| 10 | Contatar Leandro antes da entrega final e apresentar como operar um ponto real. | **Felipe**; José apoia a demonstração. | Versão estável e material da 9. | Funcionamento explicado e interesse/viabilidade de divulgação e piloto consultados. A resposta não bloqueia a entrega técnica. |
-| 11 | **Piloto real opcional:** preparar ponto, divulgar e acompanhar atendimentos. | **Felipe** coordena; José acompanha falhas; Leandro/SEMA organiza operação e divulgação. | 10; condições operacionais e tempo para testar, corrigir e retestar. | Se realizado, evidências reais e resultados conferidos; ajustes retornam à etapa 8 e atualizam o material da 9. |
-| 12 | Consolidar e entregar a Fase IV. | **Felipe** confere; José apoia; Benedito/Maria respondem pelos arquivos acadêmicos. | 9; incorporar resultados da 11 se houver. | Código, instruções, documentos e vídeos acessíveis; verificações e limitações descritas corretamente. |
-
-As etapas 2 e 3 podem avançar em paralelo; depois, 4 e 5. A preparação do ambiente pode acompanhar a implementação. A integração final e os testes completos dependem da conclusão das frentes necessárias. Cada melhoria deve ser verificada durante o desenvolvimento, sem deixar toda a checagem para o final.
-
-### Condições para o teste real
-
-O piloto só será iniciado quando houver versão estável, disponibilidade da SEMA e tempo para tratar os resultados. Leandro deverá definir ponto, datas/horários de atendimento, operador, balança, materiais e quantidades aceitos, armazenamento, destino e divulgação para atrair participantes.
-
-Se essas condições não forem atendidas antes da entrega final, o sistema e as instruções serão entregues preparados para uso experimental posterior. A ausência do piloto deve ficar explícita; não ampliar funcionalidades opcionais nem eliminar testes internos para tentar encaixar um atendimento real.
+Não há novas datas intermediárias oficiais. Se o piloto não couber antes da entrega, entregar como **sistema preparado para piloto, validado em testes controlados**, com uso real pendente. Não iniciar divulgação antes de confirmar as condições do ponto e o acesso do operador. O piloto precisa de margem para corrigir e retestar.

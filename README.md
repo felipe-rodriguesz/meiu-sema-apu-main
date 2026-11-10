@@ -1,42 +1,42 @@
 # MEIU — Resíduos Têxteis / SEMA Apucarana
 
-Projeto de mapeamento da geração de resíduos têxteis e apoio ao recebimento em pontos de coleta supervisionados.
+Sistema web para registrar resíduos têxteis, orientar a entrega em pontos supervisionados e permitir à SEMA acompanhar recebimentos e relatórios. O formulário não exige nome, CPF ou CNPJ. Registros não equivalem a pessoas únicas, e recebimento não comprova destinação posterior.
 
-Este repositório privado preserva os fontes e o histórico recebidos pelo GitLab. O desenvolvimento da Fase IV ocorre no GitHub.
+- [Formulário publicado](https://meiu-sema-apucarana.onrender.com/)
+- [Painel SEMA — exige login](https://meiu-sema-apucarana.onrender.com/admin/)
+- [Escopo e próximos passos da Fase IV](DESENVOLVIMENTO.md)
+- [Como executar, operar, testar e manter](docs/OPERACAO.md)
+- [Arquitetura e contratos da API](docs/API.md)
+- [Hospedagem, backup e limites gratuitos](docs/RENDER.md)
+- [Verificação, segurança e cronologia da entrega](docs/ENTREGA-FASEIV.md)
 
-- [Plano da Fase IV](DESENVOLVIMENTO.md)
-- [Execução, operação e manutenção](docs/OPERACAO.md)
-- [Publicação no Render gratuito](docs/RENDER.md)
-- [Verificação da versão consolidada](docs/ENTREGA-FASEIV.md)
-- [Integração entre Felipe e José](docs/INTEGRACAO-FASEIV.md)
-- [Implementação e verificações da frente de Felipe](docs/ENTREGA-FELIPE.md)
+## Funcionamento atual
+
+A SEMA configura ponto, dias/horários, materiais, limite por pedido e orientações. O gerador registra o resíduo e recebe protocolo/QR. O operador autenticado confere o material e registra o peso aferido, mantendo o declarado. Correções exigem justificativa e ficam no histórico. Relatórios oferecem filtros, totais separados e CSV para Excel.
+
+Felipe consolidou a implementação da Fase IV sobre o sistema das fases anteriores. Não há código de José pendente de integração. O mínimo funcional passou em testes controlados; piloto real e teste em celular físico permanecem pendentes. O Render gratuito é temporário e o banco expira em **06/12/2026**. Não divulgar como operação municipal permanente.
 
 ## Componentes
 
-| Pasta | Aplicação |
+| Pasta | Responsabilidade |
 | --- | --- |
-| MEIU_API | API NestJS e migrações PostgreSQL |
-| site-frontend | Painel SEMA em React |
-| mobile-frontend | Formulário público em React |
-| MEIU_BANCO | Referência SQL para instalação limpa |
+| MEIU_API | API NestJS, regras de negócio e migrações PostgreSQL. |
+| site-frontend | Painel administrativo React. |
+| mobile-frontend | Formulário React responsivo; não é aplicativo nativo. |
+| MEIU_BANCO | Referência SQL legada; instalar/atualizar com migrações. |
+| deploy e scripts | Publicação e backup/restauração. |
 
-## Executar localmente
+## Iniciar localmente
 
-Copie .env.example para .env, gere/preencha os segredos e execute:
+Requer Docker com Compose. Copie `.env.example` para `.env`, gere dois segredos aleatórios distintos para banco e JWT e preencha os campos conforme [OPERAÇÃO](docs/OPERACAO.md). Execute:
 
 ```sh
 docker compose up -d --build
 ```
 
-Formulário: http://localhost:8080/
-Painel: http://localhost:8080/admin/
+Formulário: http://localhost:8080/ — Painel: http://localhost:8080/admin/.
+Crie o operador conforme OPERAÇÃO; não existe senha padrão. Nunca envie `.env`, backups ou credenciais ao Git.
 
-Crie a conta administrativa conforme [OPERAÇÃO](docs/OPERACAO.md). Não há senha padrão. Banco e configurações locais não devem ser enviados ao Git.
+## Repositório e continuidade
 
-## Estado da implementação
-
-Já estão disponíveis: login, pontos de coleta, formulário, protocolo, consulta administrativa protegida, pesos decimais, recebimento autenticado, correção de peso com histórico, migrações e estrutura de execução/backup.
-
-Também estão implementados formulário com localização opcional, configuração operacional dos pontos, QR Code, relatórios com filtros/CSV e proteções de sessão. Felipe consolidou essa versão, sem outra implementação pendente de integração. As estatísticas antigas somam **peso declarado**, não recebimentos.
-
-O escopo e a ordem de execução seguem DESENVOLVIMENTO.md. A imagem para o Render gratuito foi testada com dados fictícios. Uso real e validação operacional com a SEMA permanecem pendentes. A hospedagem gratuita é temporária; observe os limites e a expiração do banco descritos em RENDER.md.
+O desenvolvimento acontece neste GitHub privado; a origem e o histórico do GitLab foram preservados. Uma futura entrega ao GitLab deve ser coordenada com a orientadora. Novas equipes devem começar por OPERAÇÃO e API, usar branches/pull requests e manter as limitações em ENTREGA-FASEIV atualizadas. Registros intermediários removidos da documentação atual permanecem recuperáveis pelo histórico Git.
