@@ -62,12 +62,12 @@ O painel preserva o protocolo ao pedir login, abre o pedido após autenticar e p
 - Kg declarados: quantidade_kg.
 - Kg recebidos: peso_recebido_kg somente dos pedidos RECEBIDO; pendentes não contam.
 - A correção atualiza o peso recebido do pedido. O histórico é para auditoria: **não somar eventos de histórico como novas entregas**.
-- Identificar na tela/CSV se o período usa criado_em ou recebido_em. recebido_em possui fuso; criado_em é um campo legado sem fuso no banco, que exige manter/explicitar a convenção do ambiente antes de comparar dados históricos.
+- Identificar na tela/CSV se o período usa criado_em ou recebido_em. Ambos são armazenados com fuso (timestamptz). A migração 1793232005000 converteu os valores antigos de criado_em interpretando-os como UTC, a convenção do ambiente publicado. Antes de importar dados de outra origem, confira essa convenção.
 - Relacionar ponto_coleta_id e residuo_principal aos filtros já previstos no plano.
 - Manter zero/vazio coerentes e somas precisas em gramas inteiras no relatório. Exportar o mesmo conjunto filtrado da tela.
 - Como a proteção é global, novas rotas administrativas permanecem protegidas. Marcar Public somente o que for realmente público.
 
-A migração 1793232003000 adiciona condições de atendimento sem alterar as três anteriores. Não editar migrações que já tenham sido aplicadas em um ambiente compartilhado. A reversão é recusada quando removeria condições cadastradas.
+A migração 1793232003000 adiciona condições de atendimento sem alterar as três anteriores. Não editar migrações que já tenham sido aplicadas em um ambiente compartilhado. A reversão é recusada quando removeria condições cadastradas. A migração 1793232005000 altera criado_em de timestamp para timestamptz, tratando os valores existentes como UTC; sua reversão converte de volta para UTC sem fuso.
 
 ## Condições dos pontos
 
