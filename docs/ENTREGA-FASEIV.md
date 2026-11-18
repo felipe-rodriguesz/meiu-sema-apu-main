@@ -15,7 +15,7 @@ Base conferida: `ac62dbc`, igual à main remota antes desta revisão documental.
 | Recebimento | Sessão obrigatória; busca por protocolo/QR, peso aferido, operador/data, transação contra duplicação, correção com versão/motivo/histórico. `descartes/recebimentos.service.ts`. |
 | Relatórios | Filtros, registros/pendências/recebimentos, pesos separados e CSV protegido contra fórmulas. Módulo `relatorios` e tela `Relatorios`. |
 | Interface | Campos claros, painel responsivo, condições abaixo do mapa, filtros e estados de erro/vazio. Bairro automático quando retornado pelo geocodificador; entrada manual preservada. |
-| Infraestrutura | Cinco migrações, Docker, Render, scripts de criação de operador e backup/restauração. |
+| Infraestrutura | Seis migrações (a sexta adicionada em 10/11; ver atualização ao final), Docker, Render, scripts de criação de operador e backup/restauração. |
 
 Notícias continuam opcionais: rota pública legada existe, mas não foi criada a funcionalidade editorial/interface. Documentos e vídeos acadêmicos, celular físico e piloto não são funcionalidades concluídas pelo código.
 
@@ -81,7 +81,8 @@ Datas de commit, em America/Sao_Paulo, comprovam registro/consolidação; não c
 | 29/10/2026 | Segurança/validações, pesos decimais e migrações; recebimento e correções auditadas; ambiente e testes. | `8cbe82b`, `d79cf99`, `54ec01c` |
 | 06/11/2026 | Consolidação de formulário, configuração dos pontos, QR, relatórios/CSV, interface e segurança; integração na main e publicação no Render. | `5ce175f`, `e65ba8f`, `6a9c463`; Render confirma essa versão Live. |
 | 08/11/2026 | Registro da validação HTTPS/login, criação do primeiro operador e backup restaurado; ajuste do script de restauração. | `ac62dbc` |
-| 09/11/2026 | Nova conferência de escopo, 18 testes de API + 18 de navegador, dependências e deploy; simplificação documental e registro de pendências. | Esta revisão documental. |
+| 09/11/2026 | Nova conferência de escopo, 18 testes de API + 18 de navegador, dependências e deploy; simplificação documental e registro de pendências. | `fb16caf`, `7820332`, `b329cfc` |
+| 10/11/2026 | Mapas restaurados (endereço dos tiles, CSP e Referrer-Policy); criado_em convertido para data com fuso e datas exibidas em America/Sao_Paulo na lista, nos relatórios e no CSV. | `74d425e`; publicação confirmada em 18/11 pelos cabeçalhos do site. |
 
 Para relatório semanal, status e RACI, registrar Felipe na implementação efetivamente entregue e Benedito/Maria nos documentos que produzirem. Não inventar horas nem datas intermediárias para funcionalidades consolidadas no mesmo commit. A ausência de integração de José foi informada por Felipe; o Git sozinho não prova indisponibilidade ou intenção pessoal.
 
@@ -102,3 +103,12 @@ ESLint/TypeScript configurados para API e painel, com regras recomendadas ativas
 Os ajustes substituem tipos `any` por contratos explícitos e separam estados iniciais das respostas assíncronas no cadastro de pontos, pedidos e relatórios. Não mudam as regras de negócio. Não houve atualização das versões das dependências de produção. A revisão foi validada localmente e publicada no Render em 09/11/2026, commit `7820332`, com status Live. Após a publicação, formulário, painel, login, relatórios e CSV responderam corretamente; consulta sem sessão retornou 401 e `/.env` retornou 404.
 
 Validação posterior ao ajuste: lint dos três projetos sem erros/avisos, checagem TypeScript do painel e builds aprovados; 18 testes da API e 18 de navegador aprovados. Os testes de navegador usaram a imagem local reconstruída `meiu-sema-lint:20261109`, com banco exclusivo de homologação. Uma entrada TypeScript inválida fornecida via stdin foi rejeitada pelo lint da API e do painel, confirmando a cobertura sem criar arquivos no projeto.
+
+## Atualização de 10/11/2026: mapas e fuso das datas
+
+O commit `74d425e` restaura os mapas e alinha o fuso das datas:
+
+- **Mapas:** o formulário e o painel passaram a carregar os tiles pelo endereço sem subdomínio, `https://tile.openstreetmap.org`, com a atribuição completa do OpenStreetMap. A política de conteúdo (CSP) da API e do Nginx foi ajustada para esse endereço. A API também passou a enviar `Referrer-Policy: strict-origin-when-cross-origin`, que identifica o site ao servidor de tiles sem expor caminhos.
+- **Datas:** a migração `1793232005000` converte `criado_em` para `timestamptz`, interpretando os valores antigos como UTC, a convenção do ambiente publicado. Lista de pedidos, filtros, relatórios e CSV passam a usar America/Sao_Paulo para registro e recebimento. A coluna do CSV passou de "Registro (calendário gravado)" para "Registro (São Paulo)".
+
+A suíte da API foi ajustada para esperar seis migrações e conferir a conversão de um registro legado (`2026-10-31 02:59:59` UTC); continua com 18 testes. A execução das suítes após essa mudança não foi registrada. Em 18/11/2026, os cabeçalhos do site confirmaram que essa versão está publicada (ver RENDER.md).
