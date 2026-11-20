@@ -5,6 +5,7 @@ Sistema web para registrar resíduos têxteis, orientar a entrega em pontos supe
 - [Formulário publicado](https://meiu-sema-apucarana.onrender.com/)
 - [Painel SEMA — exige login](https://meiu-sema-apucarana.onrender.com/admin/)
 - [Escopo e próximos passos da Fase IV](DESENVOLVIMENTO.md)
+- [Fluxograma do processo operacional da SEMA](docs/FLUXO-PROCESSO.md)
 - [Como executar, operar, testar e manter](docs/OPERACAO.md)
 - [Arquitetura e contratos da API](docs/API.md)
 - [Hospedagem, backup e limites gratuitos](docs/RENDER.md)
