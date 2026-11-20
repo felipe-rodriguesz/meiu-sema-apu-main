@@ -4,7 +4,7 @@ Configuração: `render.yaml` e `Dockerfile.render`. O mesmo serviço publica fo
 
 ## Implantação
 
-1. Conecte o repositório privado da equipe ao Render e selecione a versão consolidada na branch `main`.
+1. Conecte o repositório da equipe ao Render e selecione a versão consolidada na branch `main`. O repositório é público; segredos ficam somente nas variáveis do Render.
 2. Crie um Blueprint usando `render.yaml`; confirme plano **Free** para web e banco, sem adicionar recursos pagos.
 3. O Render gera JWT_SECRET e conecta DATABASE_URL ao banco interno. A origem permitida vem de RENDER_EXTERNAL_URL. Caso adicione domínio próprio, configure CORS_ORIGINS com as origens HTTPS exatas.
 4. As migrações são aplicadas no início, antes de abrir o servidor. Falha de migração interrompe a inicialização. Não use synchronize=true.
@@ -50,3 +50,7 @@ Serviço Live em `6a9c463`, banco disponível e acesso externo bloqueado. Expira
 A conexão interna usa `DATABASE_SSL=false` no Blueprint; não confundir rede privada com TLS. Manutenção externa exige verificação de certificado. O plano atual não é hospedagem permanente. A configuração de cobrança adicional/alertas personalizados ainda precisa de confirmação; recursos Free não demonstram por si só um teto de gastos da conta.
 
 Atualização posterior em 09/11/2026: commit `7820332` publicado manualmente com sucesso (Live), incluindo a regularização de lint. Acesso público, login e relatórios/CSV conferidos após a publicação. Nenhum pedido de teste foi criado em produção.
+
+## Estado confirmado em 18/11/2026
+
+A versão publicada inclui o commit `74d425e` (10/11/2026). A página pública responde 200, e os cabeçalhos trazem `img-src` com `https://tile.openstreetmap.org` e `Referrer-Policy: strict-origin-when-cross-origin`, que só existem a partir desse commit. Como o início do serviço executa `migration:run` (`deploy/start-render.sh`), a publicação aplicou a migração `1793232005000`, que converte `criado_em` para data com fuso. A data exata do deploy e os testes executados antes dele não foram registrados. Conferência feita sem login e sem criar pedidos.

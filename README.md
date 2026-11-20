@@ -40,4 +40,4 @@ Crie o operador conforme OPERAÇÃO; não existe senha padrão. Nunca envie `.en
 
 ## Repositório e continuidade
 
-O desenvolvimento acontece neste GitHub privado; a origem e o histórico do GitLab foram preservados. Uma futura entrega ao GitLab deve ser coordenada com a orientadora. Novas equipes devem começar por OPERAÇÃO e API, usar branches/pull requests e manter as limitações em ENTREGA-FASEIV atualizadas. Registros intermediários removidos da documentação atual permanecem recuperáveis pelo histórico Git.
+O desenvolvimento acontece neste repositório público no GitHub; a origem e o histórico do GitLab foram preservados. Credenciais, `.env` e backups nunca são versionados. Uma futura entrega ao GitLab deve ser coordenada com a orientadora. Novas equipes devem começar por OPERAÇÃO e API, usar branches/pull requests e manter as limitações em ENTREGA-FASEIV atualizadas. Registros intermediários removidos da documentação atual permanecem recuperáveis pelo histórico Git.
