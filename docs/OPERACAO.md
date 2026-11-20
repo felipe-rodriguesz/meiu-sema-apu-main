@@ -61,7 +61,7 @@ No formulário, localização negada/ausente não impede o registro. A localiza�
 
 O horário e o operador são definidos no servidor. Um segundo envio retorna conflito e não altera a entrega. Em falha de conexão, consulte o pedido antes de tentar novamente.
 
-Para corrigir peso, abra o pedido recebido, escolha Corrigir peso com justificativa, informe o novo valor e o motivo. O peso declarado e a data/operador do recebimento original são preservados. Se outro operador corrigir primeiro, atualize a consulta antes de tentar novamente.
+Para corrigir peso, abra o pedido recebido, escolha Corrigir peso com justificativa, informe o novo valor, diferente do peso atual, e o motivo. O peso declarado e a data/operador do recebimento original são preservados. Se outro operador corrigir primeiro, atualize a consulta antes de tentar novamente.
 
 Pontos inativos não aceitam novos pedidos; pedidos já registrados continuam disponíveis para recebimento. Um pedido antigo sem ponto vinculado exige revisão do cadastro, sem confirmação automática. A confirmação representa recebimento, não comprovação da destinação posterior.
 

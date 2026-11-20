@@ -15,7 +15,7 @@ Base conferida: `ac62dbc`, igual à main remota antes desta revisão documental.
 | Recebimento | Sessão obrigatória; busca por protocolo/QR, peso aferido, operador/data, transação contra duplicação, correção com versão/motivo/histórico. `descartes/recebimentos.service.ts`. |
 | Relatórios | Filtros, registros/pendências/recebimentos, pesos separados e CSV protegido contra fórmulas. Módulo `relatorios` e tela `Relatorios`. |
 | Interface | Campos claros, painel responsivo, condições abaixo do mapa, filtros e estados de erro/vazio. Bairro automático quando retornado pelo geocodificador; entrada manual preservada. |
-| Infraestrutura | Cinco migrações, Docker, Render, scripts de criação de operador e backup/restauração. |
+| Infraestrutura | Seis migrações, Docker, Render, scripts de criação de operador e backup/restauração. A sexta (`1793232005000`, commit `74d425e` de 10/11/2026) foi adicionada depois das verificações abaixo e grava `criado_em` com fuso. |
 
 Notícias continuam opcionais: rota pública legada existe, mas não foi criada a funcionalidade editorial/interface. Documentos e vídeos acadêmicos, celular físico e piloto não são funcionalidades concluídas pelo código.
 

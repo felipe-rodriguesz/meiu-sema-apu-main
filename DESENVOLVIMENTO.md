@@ -25,7 +25,7 @@ Objetivo: disponibilizar uma versão funcional para piloto supervisionado pela S
 
 ## Critérios de validação
 
-Fluxo: configurar ponto → registrar resíduo → guardar protocolo/QR → autenticar operador → conferir e pesar → confirmar recebimento → consultar/exportar relatório. O fluxograma com raias por ator, decisões e referências ao código está em [FLUXO-PROCESSO](docs/FLUXO-PROCESSO.md).
+Fluxo: configurar ponto → aceitar aviso de anonimato → registrar resíduo → guardar protocolo/QR → autenticar operador → conferir e pesar → confirmar recebimento → consultar/exportar relatório. O fluxograma com raias por ator, decisões e referências ao código está em [FLUXO-PROCESSO](docs/FLUXO-PROCESSO.md).
 
 Os testes controlados conferem decimais (2,5 kg), localização ausente, ponto inativo, exclusão vinculada, 10 kg declarados/8,7 kg recebidos, confirmação concorrente, correções, CSV e telas de desktop/celular emulado. Resultados e limites estão em [ENTREGA-FASEIV](docs/ENTREGA-FASEIV.md). Não declarar ausência absoluta de bugs nem validação em campo.
 

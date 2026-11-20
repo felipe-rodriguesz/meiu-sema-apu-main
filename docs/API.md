@@ -44,7 +44,7 @@ Campos adicionados ao pedido:
 
 A consulta por protocolo e as respostas de alteração incluem historico: id, versao, tipo (RECEBIMENTO/CORRECAO), peso_anterior_kg, peso_novo_kg, motivo, criado_em e operador { id, nome }. E-mail e hash de senha do operador não são retornados.
 
-Confirmações concorrentes são serializadas no banco: somente uma tem sucesso; as demais retornam 409. Correções exigem a versão que o operador visualizou e motivo de 5 a 500 caracteres. Não existem aprovação prévia, recebimentos parciais ou edição geral do pedido.
+Confirmações concorrentes são serializadas no banco: somente uma tem sucesso; as demais retornam 409. Correções exigem a versão que o operador visualizou, motivo de 5 a 500 caracteres e peso diferente do atual; repetir o peso atual retorna 409. Não existem aprovação prévia, recebimentos parciais ou edição geral do pedido.
 
 ## Link para o QR Code
 
@@ -62,7 +62,7 @@ O painel preserva o protocolo ao pedir login, abre o pedido após autenticar e p
 - Kg declarados: quantidade_kg.
 - Kg recebidos: peso_recebido_kg somente dos pedidos RECEBIDO; pendentes não contam.
 - A correção atualiza o peso recebido do pedido. O histórico é para auditoria: **não somar eventos de histórico como novas entregas**.
-- Identificar na tela/CSV se o período usa criado_em ou recebido_em. recebido_em possui fuso; criado_em é um campo legado sem fuso no banco, que exige manter/explicitar a convenção do ambiente antes de comparar dados históricos.
+- Identificar na tela/CSV se o período usa criado_em ou recebido_em. recebido_em e criado_em possuem fuso. criado_em era um campo legado sem fuso; a migração 1793232005000 o converteu, interpretando os valores antigos como UTC, a convenção do ambiente publicado. Ao importar dados de outra origem, confira a convenção antes de migrar.
 - Relacionar ponto_coleta_id e residuo_principal aos filtros já previstos no plano.
 - Manter zero/vazio coerentes e somas precisas em gramas inteiras no relatório. Exportar o mesmo conjunto filtrado da tela.
 - Como a proteção é global, novas rotas administrativas permanecem protegidas. Marcar Public somente o que for realmente público.
