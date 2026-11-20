@@ -44,7 +44,7 @@ Campos adicionados ao pedido:
 
 A consulta por protocolo e as respostas de alteração incluem historico: id, versao, tipo (RECEBIMENTO/CORRECAO), peso_anterior_kg, peso_novo_kg, motivo, criado_em e operador { id, nome }. E-mail e hash de senha do operador não são retornados.
 
-Confirmações concorrentes são serializadas no banco: somente uma tem sucesso; as demais retornam 409. Correções exigem a versão que o operador visualizou e motivo de 5 a 500 caracteres. Não existem aprovação prévia, recebimentos parciais ou edição geral do pedido.
+Confirmações concorrentes são serializadas no banco: somente uma tem sucesso; as demais retornam 409. Correções exigem a versão que o operador visualizou, motivo de 5 a 500 caracteres e peso diferente do atual; repetir o peso atual retorna 409. Não existem aprovação prévia, recebimentos parciais ou edição geral do pedido.
 
 ## Link para o QR Code
 
